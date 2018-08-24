@@ -25,8 +25,12 @@ void *LoadSharedLibrary(char *pcDllname, int iMode = 2) {
   sDllName += ".dll";
   return (void *)LoadLibrary(pcDllname);
 #elif defined(__GNUC__) // GNU compiler
-  sDllName += ".so";
-  return dlopen(sDllName.c_str(), iMode);
+  sDllName = "./lib"+sDllName+".so";
+  auto ret = dlopen(sDllName.c_str(), iMode);
+  if (!ret) {
+        fprintf(stderr, "dlopen error %s\n", dlerror());
+  }
+  return ret;
 #endif
 }
 void *GetFunction(void *Lib, char *Fnname) {
@@ -56,12 +60,14 @@ void test() {
     return;
   }
 
-  auto AddFn = static_cast<hello_ptr *>(GetFunction(hDLL, "hello"));
+  auto AddFn = reinterpret_cast<hello_ptr *>(GetFunction(hDLL, "hello"));
   if (AddFn == nullptr) {
     std::cerr << "can't get function!" << std::endl;
     return;
   }
   std::cout << AddFn() << std::endl;
-
+  std::cout << "Unload Lib" << std::endl;
   FreeSharedLibrary(hDLL);
+  std::cout << "done" << std::endl;
+
 }
