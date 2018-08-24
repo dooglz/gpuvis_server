@@ -1,23 +1,25 @@
 version: 1.0.{build}
-#image:
-#- Visual Studio 2017
-#- Ubuntu1804
-environment:
-  matrix:
-    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
-      GEN: -G "Visual Studio 15 2017 Win64"
-    - APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu1804
-      GEN: ""
+image:
+- Visual Studio 2017
+- Ubuntu1804
 configuration: Release
 platform: x64
 clone_depth: 1
+
 before_build:
 - cmd: >-
     mkdir build
 
     cd build
 
-    cmake $GEN ../ -DGPUVIS_build_tests=ON
+    cmake -G "Visual Studio 15 2017 Win64" ../ -DGPUVIS_build_tests=ON
+- sh: >-
+    mkdir build
+
+    cd build
+
+    cmake -G . ../ -DGPUVIS_build_tests=ON
+       
 build:
   project: build/ALL_BUILD.vcxproj
   parallel: true
