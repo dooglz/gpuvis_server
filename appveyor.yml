@@ -1,0 +1,38 @@
+version: 1.0.{build}
+#image:
+#- Visual Studio 2017
+#- Ubuntu1804
+environment:
+  matrix:
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+      GEN: -G "Visual Studio 15 2017 Win64"
+    - APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu1804
+      GEN: ""
+configuration: Release
+platform: x64
+clone_depth: 1
+before_build:
+- cmd: >-
+    mkdir build
+
+    cd build
+
+    cmake $GEN ../ -DGPUVIS_build_tests=ON
+build:
+  project: build/ALL_BUILD.vcxproj
+  parallel: true
+  verbosity: minimal
+  
+test_script:
+- ps: >-
+    cd C:\projects\gpuvis-server\build\bin\Release
+
+    .\Unit_Tests_run.exe --gtest_output=xml:tests.xml
+
+    $wc = New-Object 'System.Net.WebClient'
+
+    $wc.UploadFile("https://ci.appveyor.com/api/testresults/junit/$($env:APPVEYOR_JOB_ID)", (Resolve-Path .\tests.xml))
+    
+artifacts:
+- path: '**/tests.xml'
+  name: test_results
