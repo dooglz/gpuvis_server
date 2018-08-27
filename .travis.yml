@@ -3,8 +3,10 @@
 #########################
 # C++ project, but if we specify it, travis overites our CXX ENV variables
 language: generic
-dist: trusty
 sudo: false
+
+notifications:
+  email: false
 
 before_install:
   # Install a recent CMake
@@ -40,24 +42,31 @@ matrix:
     - os: osx
       env: CACHE_NAME=JOB0
       osx_image: xcode9.4
+
     # Linux / GCC
     - os: linux
-      env: COMPILER_NAME=gcc COMPILER==g++-7 CXX==g++-7 CCgcc-7 CACHE_NAME=JOB1
+      dist: trusty
+      env: CXX=g++-8 CACHE_NAME=JOB1
+      compiler: gcc
       addons:
         apt:
           sources:
             - ubuntu-toolchain-r-test
           packages:
-            - g++-7
+            - g++-8
+
     # Linux / Clang
     - os: linux
-      env: COMPILER_NAME=clang CXX=clang++-5.0 CC=clang-5.0 LLVM_VERSION=5.0 CACHE_NAME=JOB2
+      dist: trusty
+      env: CXX=clang++-6.0 CACHE_NAME=JOB2
+      compiler: clang
       addons:
-      apt:
-        sources:
-          - llvm-toolchain-trusty-5.0
-        packages:
-          - clang-5.0
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-trusty-6.0
+          packages:
+            - clang-6.0
 
 ################
 # build script #
@@ -68,10 +77,13 @@ script:
   - uname -a
   - $CXX --version
   - $CMAKE --version
+  - pwd
 
   # compile and execute 
   - git submodule update --init --recursive
   - mkdir -p build && cd build
   - $CMAKE .. -DGPUVIS_build_tests=ON
-  - $CMAKE --build . --target package --config Release -- -j4
-  - cd bin && .\Unit_Tests_run --gtest_output=xml:tests.xml
+  - $CMAKE --build . --config Release -- -j4
+  - cd bin 
+  - pwd && ls 
+  - ./Unit_Tests_run --gtest_output=xml:tests.xml

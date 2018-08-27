@@ -9,7 +9,7 @@ target_link_libraries(gpuvis_webserver
   PRIVATE mongoose
 )
 
-if ( CMAKE_COMPILER_IS_GNUCC )
+if ( CMAKE_HOST_UNIX )
   target_compile_options(mongoose PUBLIC "-w")
   target_link_libraries(gpuvis_webserver
     PRIVATE dl
