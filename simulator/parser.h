@@ -1,14 +1,15 @@
 #pragma once
-#include <string>
 #include <memory>
-class Program
-{
+#include <string>
+namespace parser{
+class Program {
 public:
-  Program(const std::string& raw);
+  Program(const std::string &raw);
   ~Program();
   const std::string raw;
-private:
 
+private:
 };
 
-std::unique_ptr<Program> Parse(const std::string& input);
+std::unique_ptr<Program> parse(const std::string &input);
+}

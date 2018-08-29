@@ -25,15 +25,16 @@ void *LoadSharedLibrary(char *pcDllname, int iMode = 2) {
   sDllName += ".dll";
   return (void *)LoadLibrary(pcDllname);
 #elif defined(__GNUC__) // GNU compiler
-  sDllName = "./lib"+sDllName+".so";
+  sDllName = "./lib" + sDllName + ".so";
   auto ret = dlopen(sDllName.c_str(), iMode);
   if (!ret) {
-        fprintf(stderr, "dlopen error %s\n", dlerror());
+    fprintf(stderr, "dlopen error %s\n", dlerror());
   }
   return ret;
 #endif
 }
 void *GetFunction(void *Lib, char *Fnname) {
+  std::cout << Fnname << std::endl;
 #if defined(_MSC_VER) // Microsoft compiler
   return (void *)GetProcAddress(static_cast<HINSTANCE>(Lib), Fnname);
 #elif defined(__GNUC__) // GNU compiler
@@ -49,25 +50,37 @@ bool FreeSharedLibrary(void *hDLL) {
 #endif
 }
 
-void test() {
+#define GET(a) reinterpret_cast<a##_ptr *>(GetFunction(hDLL, #a))
+#define CHECK(a)                                                                                                       \
+  if (_##a == nullptr) {                                                                                               \
+    std::cerr << "can't get function: " << #a << std::endl;                                                            \
+    return;                                                                                                            \
+  }
+#define FUNC(a)                                                                                                        \
+  _##a = GET(a);                                                                                                       \
+  CHECK(a);
+
+void *hDLL;
+hello_ptr *_hello;
+loadProgram_ptr *_loadProgram;
+
+void InitBridge() {
   std::cout << "woop" << std::endl;
-
-  void *hDLL;
-
   hDLL = LoadSharedLibrary("gpuvis_simulator");
   if (hDLL == nullptr) {
     std::cerr << "can't Load Simulator Lib!" << std::endl;
     return;
   }
+  FUNC(hello);
+  FUNC(loadProgram);
 
-  auto AddFn = reinterpret_cast<hello_ptr *>(GetFunction(hDLL, "hello"));
-  if (AddFn == nullptr) {
-    std::cerr << "can't get function!" << std::endl;
-    return;
-  }
-  std::cout << AddFn() << std::endl;
-  std::cout << "Unload Lib" << std::endl;
-  FreeSharedLibrary(hDLL);
-  std::cout << "done" << std::endl;
-
+  std::cout << _hello() << std::endl;
 }
+void ShutdownBridge() {
+  if (hDLL != nullptr) {
+    std::cout << "Unload Lib" << std::endl;
+    FreeSharedLibrary(hDLL);
+    std::cout << "done" << std::endl;
+  }
+}
+void inputFile(const std::string &ip) { _loadProgram(ip.c_str()); }

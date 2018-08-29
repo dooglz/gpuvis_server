@@ -4,7 +4,10 @@
 #include <iostream>
 #include <mongoose.h>
 #include <string>
-extern void test();
+extern void InitBridge();
+extern void ShutdownBridge();
+void inputFile(const std::string &ip);
+
 static const char *s_http_port = "8000";
 static uintmax_t reqs;
 static auto last_req = std::chrono::steady_clock::now();
@@ -41,6 +44,7 @@ static void ev_handler(struct mg_connection *c, int ev, void *p) {
     if (cstr != NULL) {
       const auto str = std::string(cstr);
       std::cout << "File upload done: \n\n" << str << "\n\n" << std::endl;
+      inputFile(str);
     }
     free(cstr);
     break;
@@ -49,7 +53,7 @@ static void ev_handler(struct mg_connection *c, int ev, void *p) {
 }
 
 int main() {
-  //  test();
+  InitBridge();
   struct mg_mgr mgr;
   struct mg_connection *c;
   struct mg_serve_http_opts s_http_server_opts;
@@ -77,6 +81,6 @@ int main() {
     mg_mgr_poll(&mgr, waittime);
   }
   mg_mgr_free(&mgr);
-
+  ShutdownBridge();
   return 0;
 }
