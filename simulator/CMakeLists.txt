@@ -1,6 +1,7 @@
 cmake_minimum_required (VERSION 3.11)
 project (gpuvis_simulator)
-add_library(gpuvis_simulator MODULE main.cpp simulator.h)
+file(GLOB_RECURSE SOURCE_FILES *.cpp *.h)
+add_library(gpuvis_simulator MODULE ${SOURCE_FILES})
 include(GenerateExportHeader)
 GENERATE_EXPORT_HEADER(gpuvis_simulator)
 target_include_directories(gpuvis_simulator PUBLIC ${CMAKE_CURRENT_BINARY_DIR})

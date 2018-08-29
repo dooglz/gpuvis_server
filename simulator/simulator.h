@@ -8,4 +8,5 @@
 extern "C" {
 // Would love a string, but C has none :(
 EXP(const char *hello(), hello)
+EXP(const bool loadProgram(const char* pgrm), loadProgram)
 }

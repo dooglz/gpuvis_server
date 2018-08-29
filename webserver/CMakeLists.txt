@@ -1,6 +1,8 @@
 cmake_minimum_required (VERSION 3.11)
 project (gpuvis_webserver)
-add_executable(gpuvis_webserver server.cpp bridge.cpp)
+
+file(GLOB_RECURSE SOURCE_FILES *.cpp *.h)
+add_executable(gpuvis_webserver ${SOURCE_FILES})
 
 add_library(mongoose STATIC "lib/mongoose/mongoose.c" "lib/mongoose/mongoose.h")
 target_include_directories(mongoose PUBLIC "lib/mongoose")
@@ -19,6 +21,12 @@ if ( MSVC )
   target_compile_options(mongoose PUBLIC "/W0")
 endif()
 
+add_custom_target(copy_resources ALL 
+  COMMAND ${CMAKE_COMMAND} -E copy_directory "${PROJECT_SOURCE_DIR}/static" ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIGURATION>/static
+)
+
 #As this is a dynamic module lib, can't use target_link_libraries.
 target_include_directories(gpuvis_webserver PRIVATE "${CMAKE_BINARY_DIR}/simulator")
-add_dependencies(gpuvis_webserver gpuvis_simulator)
+add_dependencies(gpuvis_webserver gpuvis_simulator copy_resources)
+
+
