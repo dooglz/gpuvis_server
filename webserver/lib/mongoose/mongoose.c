@@ -8438,7 +8438,7 @@ char* mg_file_upload_handler_string(struct mg_connection *nc, int ev, void *ev_d
     fus = (struct file_upload_state *) MG_CALLOC(1, sizeof(*fus));
     if (fus == NULL) {
       nc->flags |= MG_F_CLOSE_IMMEDIATELY;
-      return;
+      return NULL;
     }
     fus->lfn = (char *)MG_MALLOC(lfn.len + 1);
     memcpy(fus->lfn, lfn.p, lfn.len);
@@ -8481,7 +8481,7 @@ char* mg_file_upload_handler_string(struct mg_connection *nc, int ev, void *ev_d
       free(fus->localdata);
       remove(fus->lfn);
       fus->localdata = NULL;
-      return;
+      return NULL;
     }
 
     memcpy(fus->localdata + fus->num_recd, mp->data.p, mp->data.len);
