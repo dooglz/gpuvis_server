@@ -45,10 +45,14 @@ if(NOT ${GTEST_FOUND})
   set(GTEST_ROOT ${G4})
   find_package(GTest)
  endif()
-
  
+add_custom_target(copy_test_resources ALL 
+  COMMAND ${CMAKE_COMMAND} -E copy_directory "${PROJECT_SOURCE_DIR}/testresources" ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIGURATION>/testresources
+)
+
 add_executable(Unit_Tests_run test_example.cpp)
-target_link_libraries(Unit_Tests_run ${Gtest})
+add_dependencies(Unit_Tests_run copy_test_resources)
+target_link_libraries(Unit_Tests_run ${Gtest} gpuvis_simulator)
 #add_test(Unit_Tests_run Unit_Tests_run)
 gtest_discover_tests(Unit_Tests_run)
 add_test(NAME monolithic COMMAND Unit_Tests_run)

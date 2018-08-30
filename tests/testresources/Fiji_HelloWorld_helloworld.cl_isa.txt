@@ -1,0 +1,130 @@
+ShaderType = IL_SHADER_COMPUTE
+TargetChip = t
+; ------------- SC_SRCSHADER Dump ------------------
+SC_SHADERSTATE: u32NumIntVSConst = 0
+SC_SHADERSTATE: u32NumIntPSConst = 0
+SC_SHADERSTATE: u32NumIntGSConst = 0
+SC_SHADERSTATE: u32NumBoolVSConst = 0
+SC_SHADERSTATE: u32NumBoolPSConst = 0
+SC_SHADERSTATE: u32NumBoolGSConst = 0
+SC_SHADERSTATE: u32NumFloatVSConst = 0
+SC_SHADERSTATE: u32NumFloatPSConst = 0
+SC_SHADERSTATE: u32NumFloatGSConst = 0
+u32SCOptions[0] = 0x00680000 SCOption_IGNORE_SAMPLE_L_BUG SCOption_FLOAT_DO_NOT_DIST SCOption_FLOAT_DO_NOT_REASSOC
+u32SCOptions[1] = 0x40000000 SCOption_R800_UAV_NONARRAY_FIXUP
+u32SCOptions[2] = 0x08200000 SCOption_R1000_BYTE_SHORT_WRITE_WORKAROUND_BUG317611 SCOption_R1000_READLANE_SMRD_WORKAROUND_BUG343479
+u32SCOptions[3] = 0x00200102 SCOption_R1000_BARRIER_WORKAROUND_BUG405404 SCOption_R1000R1100_VCCZ_CLOBBER_WORKAROUND_BUG457939 SCOption_SELECTIVE_INLINE
+u32SCOptions[4] = 0x00001000 SCOption_R1000_ENABLE_CALL_STACK
+; -------- Disassembly --------------------
+shader main
+  asic(VI)
+  type(CS)
+
+  s_buffer_load_dwordx2  s[0:1], s[8:11], 0x00          // 000000000000: C0260004 00000000
+  s_bfe_u32     s2, s5, 0x00100000                      // 000000000008: 9282FF05 00100000
+  s_mov_b32     s3, s2                                  // 000000000010: BE830002
+  s_mov_b32     s2, s4                                  // 000000000014: BE820004
+  s_waitcnt     lgkmcnt(0)                              // 000000000018: BF8C007F
+  s_add_u32     s0, s0, s2                              // 00000000001C: 80000200
+  s_addc_u32    s1, s1, s3                              // 000000000020: 82010301
+  v_mov_b32     v0, 0x00000048                          // 000000000024: 7E0002FF 00000048
+  v_mov_b32     v1, s0                                  // 00000000002C: 7E020200
+  v_mov_b32     v2, s1                                  // 000000000030: 7E040201
+  s_add_u32     s2, s0, 1                               // 000000000034: 80028100
+  s_addc_u32    s3, s1, 0                               // 000000000038: 82038001
+  v_mov_b32     v3, 0x00000045                          // 00000000003C: 7E0602FF 00000045
+  v_mov_b32     v4, s2                                  // 000000000044: 7E080202
+  v_mov_b32     v5, s3                                  // 000000000048: 7E0A0203
+  s_add_u32     s2, s0, 2                               // 00000000004C: 80028200
+  s_addc_u32    s3, s1, 0                               // 000000000050: 82038001
+  v_mov_b32     v6, 0x0000004c                          // 000000000054: 7E0C02FF 0000004C
+  flat_store_byte  v[1:2], v0 glc                       // 00000000005C: DC610000 00000001
+  v_mov_b32     v0, s2                                  // 000000000064: 7E000202
+  v_mov_b32     v1, s3                                  // 000000000068: 7E020203
+  s_add_u32     s2, s0, 3                               // 00000000006C: 80028300
+  s_addc_u32    s3, s1, 0                               // 000000000070: 82038001
+  flat_store_byte  v[4:5], v3 glc                       // 000000000074: DC610000 00000304
+  v_mov_b32     v2, s2                                  // 00000000007C: 7E040202
+  v_mov_b32     v3, s3                                  // 000000000080: 7E060203
+  s_add_u32     s2, s0, 4                               // 000000000084: 80028400
+  s_addc_u32    s3, s1, 0                               // 000000000088: 82038001
+  v_mov_b32     v4, 0x0000004f                          // 00000000008C: 7E0802FF 0000004F
+  flat_store_byte  v[0:1], v6 glc                       // 000000000094: DC610000 00000600
+  v_mov_b32     v0, s2                                  // 00000000009C: 7E000202
+  v_mov_b32     v1, s3                                  // 0000000000A0: 7E020203
+  s_add_u32     s2, s0, 5                               // 0000000000A4: 80028500
+  s_addc_u32    s3, s1, 0                               // 0000000000A8: 82038001
+  v_mov_b32     v5, 32                                  // 0000000000AC: 7E0A02A0
+  flat_store_byte  v[2:3], v6 glc                       // 0000000000B0: DC610000 00000602
+  v_mov_b32     v2, s2                                  // 0000000000B8: 7E040202
+  v_mov_b32     v3, s3                                  // 0000000000BC: 7E060203
+  s_add_u32     s2, s0, 6                               // 0000000000C0: 80028600
+  s_addc_u32    s3, s1, 0                               // 0000000000C4: 82038001
+  v_mov_b32     v6, 0x00000057                          // 0000000000C8: 7E0C02FF 00000057
+  flat_store_byte  v[0:1], v4 glc                       // 0000000000D0: DC610000 00000400
+  v_mov_b32     v0, s2                                  // 0000000000D8: 7E000202
+  v_mov_b32     v1, s3                                  // 0000000000DC: 7E020203
+  s_add_u32     s2, s0, 7                               // 0000000000E0: 80028700
+  s_addc_u32    s3, s1, 0                               // 0000000000E4: 82038001
+  flat_store_byte  v[2:3], v5 glc                       // 0000000000E8: DC610000 00000502
+  v_mov_b32     v2, s2                                  // 0000000000F0: 7E040202
+  v_mov_b32     v3, s3                                  // 0000000000F4: 7E060203
+  s_add_u32     s2, s0, 8                               // 0000000000F8: 80028800
+  s_addc_u32    s3, s1, 0                               // 0000000000FC: 82038001
+  v_mov_b32     v5, 0x00000052                          // 000000000100: 7E0A02FF 00000052
+  flat_store_byte  v[0:1], v6 glc                       // 000000000108: DC610000 00000600
+  v_mov_b32     v0, s2                                  // 000000000110: 7E000202
+  v_mov_b32     v1, s3                                  // 000000000114: 7E020203
+  s_add_u32     s2, s0, 9                               // 000000000118: 80028900
+  s_addc_u32    s3, s1, 0                               // 00000000011C: 82038001
+  v_mov_b32     v6, 0x0000004c                          // 000000000120: 7E0C02FF 0000004C
+  flat_store_byte  v[2:3], v4 glc                       // 000000000128: DC610000 00000402
+  v_mov_b32     v2, s2                                  // 000000000130: 7E040202
+  v_mov_b32     v3, s3                                  // 000000000134: 7E060203
+  s_add_u32     s2, s0, 10                              // 000000000138: 80028A00
+  s_addc_u32    s3, s1, 0                               // 00000000013C: 82038001
+  v_mov_b32     v4, 0x00000044                          // 000000000140: 7E0802FF 00000044
+  flat_store_byte  v[0:1], v5 glc                       // 000000000148: DC610000 00000500
+  v_mov_b32     v0, s2                                  // 000000000150: 7E000202
+  v_mov_b32     v1, s3                                  // 000000000154: 7E020203
+  s_add_u32     s2, s0, 11                              // 000000000158: 80028B00
+  s_addc_u32    s3, s1, 0                               // 00000000015C: 82038001
+  v_mov_b32     v5, 33                                  // 000000000160: 7E0A02A1
+  flat_store_byte  v[2:3], v6 glc                       // 000000000164: DC610000 00000602
+  v_mov_b32     v2, s2                                  // 00000000016C: 7E040202
+  v_mov_b32     v3, s3                                  // 000000000170: 7E060203
+  s_add_u32     s0, s0, 12                              // 000000000174: 80008C00
+  s_addc_u32    s1, s1, 0                               // 000000000178: 82018001
+  v_mov_b32     v6, 10                                  // 00000000017C: 7E0C028A
+  flat_store_byte  v[0:1], v4 glc                       // 000000000180: DC610000 00000400
+  v_mov_b32     v0, s0                                  // 000000000188: 7E000200
+  v_mov_b32     v1, s1                                  // 00000000018C: 7E020201
+  flat_store_byte  v[2:3], v5 glc                       // 000000000190: DC610000 00000502
+  flat_store_byte  v[0:1], v6 glc                       // 000000000198: DC610000 00000600
+  s_endpgm                                              // 0000000001A0: BF810000
+end
+
+; ----------------- CS Data ------------------------
+
+codeLenInByte        = 420 bytes;
+
+userElementCount     = 2;
+;  userElements[0]      = IMM_UAV 12, s[4:7]
+;  userElements[1]      = IMM_CONST_BUFFER 1, s[8:11]
+extUserElementCount  = 0;
+NumVgprs             = 0; NumVgprs is modified by runtime to be 7; 
+NumSgprs             = 0; NumSgprs is modified by runtime to be 14; 
+FloatMode            = 192;
+IeeeMode             = 0;
+FlatPtr32            = 0;
+ScratchSize          = 0 dwords/thread;
+LDSByteSize          = 0 bytes/workgroup (compile time only);
+ScratchWaveOffsetReg = s0;
+; texSamplerUsage         = 0x00000000
+; constBufUsage           = 0x00000000
+
+;COMPUTE_PGM_RSRC2       = 0x00000018
+COMPUTE_PGM_RSRC2:USER_SGPR      = 12
+NumThreadX                       = 256
+; Register allocation strategy = 0
+

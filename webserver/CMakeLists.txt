@@ -9,6 +9,7 @@ target_include_directories(mongoose PUBLIC "lib/mongoose")
 
 target_link_libraries(gpuvis_webserver
   PRIVATE mongoose
+  PRIVATE gpuvis_simulator
 )
 
 if ( CMAKE_HOST_UNIX )
@@ -25,8 +26,6 @@ add_custom_target(copy_resources ALL
   COMMAND ${CMAKE_COMMAND} -E copy_directory "${PROJECT_SOURCE_DIR}/static" ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIGURATION>/static
 )
 
-#As this is a dynamic module lib, can't use target_link_libraries.
-target_include_directories(gpuvis_webserver PRIVATE "${CMAKE_BINARY_DIR}/simulator")
-add_dependencies(gpuvis_webserver gpuvis_simulator copy_resources)
+add_dependencies(gpuvis_webserver copy_resources)
 
 
