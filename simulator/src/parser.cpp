@@ -1,54 +1,32 @@
 #include "parser.h"
+#include "decoders/decoder.h"
 #include <algorithm>
 #include <iostream>
 #include <vector>
-#define beginsWith(a, b) (a.find(b, 0) == 0)
-#define FAIL(a)                                                                                                        \
-  std::cerr << "Invalid program file:\n" << #a << std::endl;                                                           \
-  return nullptr;
+
 using namespace parser;
 
-Program::Program(const std::string &raw) : raw(raw) { std::cout << "Program Constructor!" << std::endl; }
+Program::Program(const std::string& raw, std::vector<operation*>& _ops)
+    : raw(raw), ops(_ops) {
+  std::cout << "Program Constructor" << std::endl;
+  for (const auto op : ops) {
+    opcount[op->type]++;
+  }
+
+  for (auto elem : opcount) {
+    std::cout << opcode_type_string[elem.first] << ": " << elem.second << "\n";
+  }
+  std::cout << "Program Ready, " << ops.size() << " ops" << std::endl;
+}
 
 Program::~Program() {}
 
-static void parseASM(const std::string &input) { std::cout << "asm: " << input << std::endl; }
-
-std::unique_ptr<Program> parser::parse(const std::string &input) {
-  if (!beginsWith(input, "ShaderType = IL_SHADER_COMPUTE")) {
-    FAIL(input.substr(0, 10));
+std::unique_ptr<Program> parser::parse(const std::string& input) {
+  auto d = decoder::find(input);
+  if (d != nullptr) {
+    std::cout << "Parsing file as " << d->name() << std::endl;
+    return d->parse(input);
   }
-
-  std::vector<std::string> lines;
-  std::string currentline = "";
-  for (const char c : input) {
-    switch (c) {
-    case '\r':
-      break;
-    case '\n':
-      if (currentline.length() > 0) {
-        lines.push_back(currentline);
-      }
-      currentline = "";
-      break;
-    default:
-      currentline += c;
-    }
-  }
-
-  auto fs = std::find_if(lines.begin(), lines.end(), [](std::string x) { return beginsWith(x, "shader main"); });
-
-  if (fs == lines.end()) {
-    FAIL("No ASM!");
-  }
-
-  auto fe = std::find_if(fs, lines.end(), [](std::string x) { return beginsWith(x, "end"); });
-  if (fe == lines.end()) {
-    FAIL("Too Much ASM!");
-  }
-  while (++fs != fe) {
-    parseASM(*fs);
-  }
-
-  return std::unique_ptr<Program>(new Program(input));
+  std::cerr << "Invalid program file" << std::endl;
+  return nullptr;
 }

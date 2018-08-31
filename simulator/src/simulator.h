@@ -1,8 +1,7 @@
-#include <gpuvis_simulator_export.h>
-#include <string>
+#pragma once
+#include "parser.h"
 
-namespace gpuvis {
-GPUVIS_SIMULATOR_EXPORT const std::string hello();
-GPUVIS_SIMULATOR_EXPORT const bool loadProgram(const std::string &pgrm);
+namespace simulator {
+bool run(const parser::Program& const pgrm);
 
-} // namespace gpuvis
+} // namespace simulator

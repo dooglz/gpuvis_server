@@ -1,0 +1,21 @@
+#pragma once
+#include <string>
+#include <vector>
+
+enum opcode_type { VECTOR, SCALER, MEMORY, FLAT };
+
+static const std::string opcode_type_string[] = {"VECTOR", "SCALER", "MEMORY", "FLAT"};
+
+struct operation {
+  const std::string opcode;
+  const opcode_type type;
+  const bool branching;
+  const uint8_t ticks;
+  const std::string helptext;
+  const std::vector<uint8_t> reads;
+  const std::vector<uint8_t> writes;
+};
+
+#define REGS(...) std::vector<uint8_t>({__VA_ARGS__})
+#define OP(opcode, type, branch, ticks, help, r, w)                                      \
+  { #opcode, type, branch, ticks, #help, r, w }

@@ -1,4 +1,4 @@
-#include "../simulator/src/simulator.h"
+#include "../simulator/src/gpuvis.h"
 #include <chrono>
 #include <iostream>
 #include <string>
@@ -10,4 +10,4 @@ void InitBridge() {
 
 void ShutdownBridge() {}
 
-void inputFile(const std::string &ip) { gpuvis::loadProgram(ip); }
+void inputFile(const std::string& ip) { gpuvis::loadProgram(ip); }
