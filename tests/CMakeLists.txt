@@ -51,9 +51,9 @@ add_custom_target(copy_test_resources ALL
 )
 
 add_executable(Unit_Tests_run test_example.cpp)
-add_dependencies(Unit_Tests_run copy_test_resources)
+add_dependencies(Unit_Tests_run copy_test_resources gpuvis_simulator)
 target_link_libraries(Unit_Tests_run ${Gtest} gpuvis_simulator)
 #add_test(Unit_Tests_run Unit_Tests_run)
-gtest_discover_tests(Unit_Tests_run)
-add_test(NAME monolithic COMMAND Unit_Tests_run)
+gtest_discover_tests(Unit_Tests_run WORKING_DIRECTORY "$<TARGET_FILE_DIR:gpuvis_simulator>")
+#add_test(NAME monolithic COMMAND Unit_Tests_run)
 #add_test(NAME monolithic COMMAND Unit_Tests_run)
