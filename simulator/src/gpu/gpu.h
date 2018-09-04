@@ -2,12 +2,27 @@
 #include "../isa/isa.h"
 #include <vector>
 
-#define R9Fury 56, 4, 16
+//#define R9Fury 56, 4, 16
+#define R9Fury 2, 4, 16
+class GPU;
+class GPU_Component {
+public:
+  GPU_Component(const GPU &gpu, size_t id = 0, GPU_Component *const parent = nullptr);
+  GPU_Component() = delete;
+
+public:
+  const GPU &_gpu;
+  const size_t _localId;
+  const size_t _globalId, _globalIdX, _globalIdY, _globalIdZ;
+  const GPU_Component *_parent;
+};
 
 class Register {
 public:
   Register();
   ~Register();
+  const void read(uint8_t addr){};
+  const void write(uint8_t addr){};
 
 private:
 };
@@ -20,18 +35,16 @@ public:
 private:
 };
 
-struct SimdLane {
-  SimdLane(size_t id = 0);
+struct SimdLane : public GPU_Component {
+  SimdLane(const GPU &gpu, size_t id = 0, GPU_Component *constparent = nullptr);
   bool tick(const operation &op);
-  size_t id;
   Register VGPR;
   ExecutionUnit EX;
 };
 
-struct SimdUnit {
-  SimdUnit(size_t SLanes, size_t id = 0);
+struct SimdUnit : public GPU_Component {
+  SimdUnit(size_t SLanes, const GPU &gpu, size_t id = 0, GPU_Component *constparent = nullptr);
   bool tick(const operation &op);
-  size_t id;
   std::vector<SimdLane> simdLanes;
 };
 
@@ -41,9 +54,8 @@ struct ScalerUnit {
   ExecutionUnit EX;
 };
 
-struct ComputeUnit {
-  ComputeUnit(size_t SimdUs, size_t SLanes, size_t id = 0);
-  size_t id;
+struct ComputeUnit : public GPU_Component {
+  ComputeUnit(size_t SimdUs, size_t SLanes, const GPU &gpu, size_t id = 0, GPU_Component *const parent = nullptr);
   std::vector<SimdUnit> simdUnits;
   bool tick(const operation &op);
   ScalerUnit SU;
