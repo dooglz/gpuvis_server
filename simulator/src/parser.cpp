@@ -6,8 +6,7 @@
 
 using namespace parser;
 
-Program::Program(const std::string& raw, std::vector<operation*>& _ops)
-    : raw(raw), ops(_ops) {
+Program::Program(const std::string &raw, std::vector<const operation *> &_ops) : raw(raw), ops(_ops) {
   std::cout << "Program Constructor" << std::endl;
   for (const auto op : ops) {
     opcount[op->type]++;
@@ -21,7 +20,7 @@ Program::Program(const std::string& raw, std::vector<operation*>& _ops)
 
 Program::~Program() {}
 
-std::unique_ptr<Program> parser::parse(const std::string& input) {
+std::unique_ptr<Program> parser::parse(const std::string &input) {
   auto d = decoder::find(input);
   if (d != nullptr) {
     std::cout << "Parsing file as " << d->name() << std::endl;

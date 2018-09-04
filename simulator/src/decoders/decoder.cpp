@@ -34,27 +34,21 @@ class rga_disasm_compute : public decoderT {
   const std::string name() { return "rga_disasm_compute"; }
   bool compatible(const std::string &input);
   std::unique_ptr<parser::Program> parse(const std::string &input);
-  operation *parseASM(const std::string &input);
+  const operation *parseASM(const std::string &input);
 };
 
 bool rga_disasm_compute::compatible(const std::string &input) {
   return beginsWith(input, "ShaderType = IL_SHADER_COMPUTE");
 }
 
-operation *rga_disasm_compute::parseASM(const std::string &input) {
+const operation *rga_disasm_compute::parseASM(const std::string &input) {
   const auto tokens = split<std::string>(input, " ,");
   if (tokens.size() > 0) {
     const std::string opcode = tokens[0];
-    operation *op = nullptr;
     for (auto &opi : ISA) {
-      if (opi.opcode == opcode) {
-        op = &opi;
-        break;
+      if (opi.opcode_str == opcode) {
+        return &opi;
       }
-    }
-    if (op != nullptr) {
-      // std::cout << "asm: " << op->opcode << std::endl;
-      return op;
     }
   }
   std::cerr << "asm: UNKOWN: " << input << std::endl;
@@ -91,7 +85,7 @@ std::unique_ptr<Program> rga_disasm_compute::parse(const std::string &input) {
   if (fe == lines.end()) {
     FAIL("Too Much ASM!");
   }
-  std::vector<operation *> ops;
+  std::vector<const operation *> ops;
   while (++fs != fe) {
     auto op = parseASM(*fs);
     if (op != nullptr) {

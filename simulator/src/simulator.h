@@ -2,6 +2,6 @@
 #include "parser.h"
 
 namespace simulator {
-bool run(const parser::Program& pgrm);
+bool run(const parser::Program &pgrm);
 
 } // namespace simulator

@@ -7,7 +7,8 @@ enum opcode_type { VECTOR, SCALER, MEMORY, FLAT };
 static const std::string opcode_type_string[] = {"VECTOR", "SCALER", "MEMORY", "FLAT"};
 
 struct operation {
-  const std::string opcode;
+  const std::string opcode_str;
+  const unsigned int opcode;
   const opcode_type type;
   const bool branching;
   const uint8_t ticks;
@@ -17,5 +18,5 @@ struct operation {
 };
 
 #define REGS(...) std::vector<uint8_t>({__VA_ARGS__})
-#define OP(opcode, type, branch, ticks, help, r, w)                                      \
-  { #opcode, type, branch, ticks, #help, r, w }
+#define OP(opcode, type, branch, ticks, help, r, w)                                                                    \
+  { #opcode, opcode, type, branch, ticks, #help, r, w }

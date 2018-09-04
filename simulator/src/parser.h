@@ -7,10 +7,10 @@
 namespace parser {
 class Program {
 public:
-  Program(const std::string &raw, std::vector<operation *> &ops);
+  Program(const std::string &raw, std::vector<const operation *> &ops);
   ~Program();
   const std::string raw;
-  const std::vector<operation *> ops;
+  const std::vector<const operation *> ops;
   std::map<opcode_type, uint16_t> opcount;
 
 private:

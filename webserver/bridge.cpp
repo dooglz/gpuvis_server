@@ -10,4 +10,4 @@ void InitBridge() {
 
 void ShutdownBridge() {}
 
-void inputFile(const std::string& ip) { gpuvis::loadProgram(ip); }
+void inputFile(const std::string &ip) { gpuvis::loadProgram(ip); }
