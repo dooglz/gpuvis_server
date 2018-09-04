@@ -34,15 +34,14 @@ class rga_disasm_compute : public decoderT {
   const std::string name() { return "rga_disasm_compute"; }
   bool compatible(const std::string &input);
   std::unique_ptr<parser::Program> parse(const std::string &input);
-  operation *decoder::rga_disasm_compute::parseASM(const std::string &input);
+  operation *parseASM(const std::string &input);
 };
-} // namespace decoder
 
-bool decoder::rga_disasm_compute::compatible(const std::string &input) {
+bool rga_disasm_compute::compatible(const std::string &input) {
   return beginsWith(input, "ShaderType = IL_SHADER_COMPUTE");
 }
 
-operation *decoder::rga_disasm_compute::parseASM(const std::string &input) {
+operation *rga_disasm_compute::parseASM(const std::string &input) {
   const auto tokens = split<std::string>(input, " ,");
   if (tokens.size() > 0) {
     const std::string opcode = tokens[0];
@@ -62,7 +61,7 @@ operation *decoder::rga_disasm_compute::parseASM(const std::string &input) {
   return nullptr;
 }
 
-std::unique_ptr<Program> decoder::rga_disasm_compute::parse(const std::string &input) {
+std::unique_ptr<Program> rga_disasm_compute::parse(const std::string &input) {
   std::cout << "rga_disasm_compute parsing" << std::endl;
   std::vector<std::string> lines;
 
@@ -104,7 +103,7 @@ std::unique_ptr<Program> decoder::rga_disasm_compute::parse(const std::string &i
   return std::unique_ptr<Program>(new Program(input, ops));
 }
 
-std::unique_ptr<decoder::decoderT> decoder::find(const std::string &input) {
+std::unique_ptr<decoder::decoderT> find(const std::string &input) {
   std::unique_ptr<decoder::decoderT> b[] = {std::make_unique<decoder::rga_disasm_compute>()};
   for (auto &d : b) {
     if (d->compatible(input)) {
@@ -113,3 +112,4 @@ std::unique_ptr<decoder::decoderT> decoder::find(const std::string &input) {
   }
   return nullptr;
 }
+} // namespace decoder

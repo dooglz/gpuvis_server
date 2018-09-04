@@ -4,7 +4,7 @@
 
 namespace simulator {
 
-bool run(const parser::Program& const pgrm) {
+bool run(const parser::Program& pgrm) {
   GPU gpu = GPU(R9Fury);
   gpu.launchParameters(64, 1, 1);
 

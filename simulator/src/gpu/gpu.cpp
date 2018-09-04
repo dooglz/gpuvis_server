@@ -13,7 +13,7 @@ GPU::GPU(size_t CUs, size_t SimdUs, size_t SLanes) {
 }
 GPU::~GPU() {}
 
-bool GPU::tick(const operation& const op) {
+bool GPU::tick(const operation& op) {
 
   std::cout << "gpu: processing" << op.opcode << std::endl;
   return true;

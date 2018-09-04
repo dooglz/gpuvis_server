@@ -45,7 +45,7 @@ public:
   ~GPU();
   std::vector<ComputeUnit> ComputeUnits;
   void launchParameters(size_t x, size_t y, size_t z) {}
-  bool tick(const operation& const op);
+  bool tick(const operation& op);
   size_t tickcount;
   enum GPUstate { READY, END, CRASH };
   GPUstate state;

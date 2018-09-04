@@ -24,7 +24,6 @@ if(NOT ${GTEST_FOUND})
     #Configure Release Gtest
     file(MAKE_DIRECTORY ${G_build})
     message(STATUS "Configuring Gtest")
-    target_compile_options(mongoose PUBLIC "/W0")
     execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" ${G_source}  -DCMAKE_INSTALL_PREFIX=${G_install} -Dgtest_force_shared_crt=ON
       RESULT_VARIABLE result
       WORKING_DIRECTORY ${G_build} 
