@@ -14,7 +14,7 @@ static auto last_req = std::chrono::steady_clock::now();
 
 std::string intToIp(const unsigned long &ip) {
   char buff[10];
-  snprintf(buff, sizeof(buff), "%d.%d.%d.%d", ip & 0xFF, (ip >> 8) & 0xFF, (ip >> 16) & 0xFF, (ip >> 24) & 0xFF);
+  snprintf(buff, sizeof(buff), "%lu.%lu.%lu.%lu", ip & 0xFF, (ip >> 8) & 0xFF, (ip >> 16) & 0xFF, (ip >> 24) & 0xFF);
   return std::string(buff);
 }
 
@@ -28,14 +28,14 @@ static void ev_handler(struct mg_connection *c, int ev, void *p) {
   case MG_EV_HTTP_REQUEST: {
     mg_serve_http(c, (http_message *)p, s_http_server_opts);
     break;
-    reqs++;
-    last_req = std::chrono::steady_clock::now();
-    auto *hm = static_cast<struct http_message *>(p);
-    std::cout << reqs << '\t' << intToIp(c->sa.sin.sin_addr.s_addr) << std::endl;
-    const std::string str(R"({"id":1,"error":null})");
-    mg_send_head(c, 200, str.length(), "Content-Type: application/json");
-    mg_send(c, str.c_str(), str.length());
-    break;
+    // reqs++;
+    // last_req = std::chrono::steady_clock::now();
+    // auto *hm = static_cast<struct http_message *>(p);
+    // std::cout << reqs << '\t' << intToIp(c->sa.sin.sin_addr.s_addr) << std::endl;
+    // const std::string str(R"({"id":1,"error":null})");
+    // mg_send_head(c, 200, str.length(), "Content-Type: application/json");
+    // mg_send(c, str.c_str(), str.length());
+    // break;
   }
   case MG_EV_HTTP_PART_BEGIN:
   case MG_EV_HTTP_PART_DATA:
