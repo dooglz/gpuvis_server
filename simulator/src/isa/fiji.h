@@ -22,6 +22,6 @@ const operation ISA[] = {
     OP(s_add_u32, SCALER, false, 1, generic 32bit add, REGS(1, 2), REGS(0)),
     OP(s_addc_u32, SCALER, false, 1, generic 32bit add + SCC, REGS(1, 2), REGS(0)),
     OP(v_mov_b32, VECTOR, false, 1, generic 32bit move, REGS(1), REGS(0)),
-    OP(flat_store_byte, FLAT, false, 1, write(1) to somewhere(0), REGS(1), REGS()),
+    OP(flat_store_byte, FLAT, false, 1, write(1) to somewhere(0), REGS(1), REGS(0)),
     OP(s_waitcnt, SCALER, false, 1, , REGS(), REGS()),
     OP(s_endpgm, SCALER, false, 1, , REGS(), REGS())};

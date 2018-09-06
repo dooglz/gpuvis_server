@@ -3,6 +3,7 @@
 #include "../parser.h"
 #include <algorithm>
 #include <iostream>
+#include <memory>
 #include <vector>
 
 opcode_type a;
@@ -19,21 +20,23 @@ template <typename T> std::vector<T> split(const T &str, const T &delimiters) {
   typename T::size_type start = 0;
   auto pos = str.find_first_of(delimiters, start);
   while (pos != T::npos) {
-    if (pos != start) // ignore empty tokens
+    if (pos != start) { // ignore empty tokens
       v.emplace_back(str, start, pos - start);
+    }
     start = pos + 1;
     pos = str.find_first_of(delimiters, start);
   }
-  if (start < str.length())                           // ignore trailing delimiter
+  if (start < str.length()) {                         // ignore trailing delimiter
     v.emplace_back(str, start, str.length() - start); // add what's left of the string
+  }
   return v;
 }
 
 namespace decoder {
 class rga_disasm_compute : public decoderT {
-  const std::string name() { return "rga_disasm_compute"; }
-  bool compatible(const std::string &input);
-  std::unique_ptr<parser::Program> parse(const std::string &input);
+  const std::string name() override { return "rga_disasm_compute"; }
+  bool compatible(const std::string &input) override;
+  std::unique_ptr<parser::Program> parse(const std::string &input) override;
   const operation *parseASM(const std::string &input);
 };
 
@@ -43,7 +46,7 @@ bool rga_disasm_compute::compatible(const std::string &input) {
 
 const operation *rga_disasm_compute::parseASM(const std::string &input) {
   const auto tokens = split<std::string>(input, " ,");
-  if (tokens.size() > 0) {
+  if (!tokens.empty()) {
     const std::string opcode = tokens[0];
     for (auto &opi : ISA) {
       if (opi.opcode_str == opcode) {
@@ -59,7 +62,7 @@ std::unique_ptr<Program> rga_disasm_compute::parse(const std::string &input) {
   std::cout << "rga_disasm_compute parsing" << std::endl;
   std::vector<std::string> lines;
 
-  std::string currentline = "";
+  std::string currentline = currentline;
   for (const char c : input) {
     switch (c) {
     case '\r':
@@ -94,7 +97,7 @@ std::unique_ptr<Program> rga_disasm_compute::parse(const std::string &input) {
       ops.push_back(&ISA[0]);
     }
   }
-  return std::unique_ptr<Program>(new Program(input, ops));
+  return std::make_unique<Program>(input, ops);
 }
 
 std::unique_ptr<decoder::decoderT> find(const std::string &input) {

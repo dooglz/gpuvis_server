@@ -2,23 +2,18 @@
 #include "decoders/decoder.h"
 #include <algorithm>
 #include <iostream>
+#include <utility>
 #include <vector>
 
 using namespace parser;
 
-Program::Program(const std::string &raw, std::vector<const operation *> &_ops) : raw(raw), ops(_ops) {
+Program::Program(std::string raw, std::vector<const operation *> &_ops) : raw(std::move(raw)), ops(_ops) {
   std::cout << "Program Constructor" << std::endl;
-  for (const auto op : ops) {
-    opcount[op->type]++;
-  }
 
-  for (auto elem : opcount) {
-    std::cout << opcode_type_string[elem.first] << ": " << elem.second << "\n";
-  }
   std::cout << "Program Ready, " << ops.size() << " ops" << std::endl;
 }
 
-Program::~Program() {}
+Program::~Program() = default;
 
 std::unique_ptr<Program> parser::parse(const std::string &input) {
   auto d = decoder::find(input);

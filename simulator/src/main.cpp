@@ -8,9 +8,10 @@ const std::string gpuvis::hello() { return "Hello Simulator World"; }
 static std::map<uint16_t, std::unique_ptr<parser::Program>> pgrm_db;
 static uint16_t key = 0;
 
-const int gpuvis::loadProgram(const std::string& pgrm) {
+const int gpuvis::loadProgram(const std::string &pgrm) {
   auto a = parser::parse(pgrm);
   if (a != nullptr) {
+    simulator::pgrmstats(*a);
     pgrm_db[++key] = std::move(a);
     return key;
   }
