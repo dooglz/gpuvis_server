@@ -7,7 +7,7 @@
 
 using namespace parser;
 
-Program::Program(std::string raw, std::vector<const operation *> &_ops) : raw(std::move(raw)), ops(_ops) {
+Program::Program(std::string raw, std::vector<actual_operation > &_ops) : raw(std::move(raw)), ops(_ops) {
   std::cout << "Program Constructor" << std::endl;
 
   std::cout << "Program Ready, " << ops.size() << " ops" << std::endl;

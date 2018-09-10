@@ -10,7 +10,7 @@ bool run(const parser::Program &pgrm) {
 
   auto op = pgrm.ops.begin();
   while (gpu.state == gpu.READY && op != pgrm.ops.end()) {
-    gpu.tick(**op);
+    gpu.tick(*op);
     op++;
   }
   if (gpu.state != gpu.END) {
@@ -25,13 +25,13 @@ void pgrmstats(const parser::Program &pgrm) {
   std::map<opcode_type, size_t> opcount;
   size_t vregr = 0, vregw = 0, sregr = 0, sregw = 0;
   for (const auto op : pgrm.ops) {
-    opcount[op->type]++;
-    if (op->type == VECTOR) {
-      vregr += op->reads.size();
-      vregw += op->writes.size();
-    } else if (op->type == SCALER) {
-      sregr += op->reads.size();
-      sregw += op->writes.size();
+    opcount[op.op->type]++;
+    if (op.op->type == VECTOR) {
+      vregr += op.op->reads.size();
+      vregw += op.op->writes.size();
+    } else if (op.op->type == SCALER) {
+      sregr += op.op->reads.size();
+      sregw += op.op->writes.size();
     }
   }
 

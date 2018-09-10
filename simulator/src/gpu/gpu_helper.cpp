@@ -117,7 +117,7 @@ SimdLane::SimdLane(const GPU &gpu, size_t id, GPU_Component *const parent)
 
 GPU::~GPU() = default;
 
-GPU_Component::GPU_Component(const GPU &gpu, size_t id, GPU_Component *parent, std::string type)
+GPU_Component::GPU_Component(const GPU &gpu, size_t id, GPU_Component *parent, std::string& type)
     : _gpu(gpu), _localId(id), _parent(parent), _globalId(getGlobalID(parent, id, 0)), _type(std::move(type)) {
   // std::cout << "gpu: New thing: " << _type << _globalId << " " << idToStr(_globalId) << std::endl;
 }

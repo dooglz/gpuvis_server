@@ -37,32 +37,46 @@ class rga_disasm_compute : public decoderT {
   const std::string name() override { return "rga_disasm_compute"; }
   bool compatible(const std::string &input) override;
   std::unique_ptr<parser::Program> parse(const std::string &input) override;
-  const operation *parseASM(const std::string &input);
+  const actual_operation parseASM(const std::string &input);
 };
 
 bool rga_disasm_compute::compatible(const std::string &input) {
   return beginsWith(input, "ShaderType = IL_SHADER_COMPUTE");
 }
 
-const operation *rga_disasm_compute::parseASM(const std::string &input) {
+
+const operand parseOperand(const std::string &input) {
+  const auto tokens = split<std::string>(input, " ,");
+  if (tokens.size() > 1) {
+    operand ret = tokens[1];
+    for (size_t i = 2; i < tokens.size(); i++)
+    {
+      ret += ("_"+tokens[i]);
+    }
+  }
+  return "";
+}
+
+const actual_operation rga_disasm_compute::parseASM(const std::string &input) {
   const auto tokens = split<std::string>(input, " ,");
   if (!tokens.empty()) {
     const std::string opcode = tokens[0];
     for (auto &opi : ISA) {
       if (opi.opcode_str == opcode) {
-        return &opi;
+          return { &opi, parseOperand(input) };
       }
     }
   }
   std::cerr << "asm: UNKOWN: " << input << std::endl;
-  return nullptr;
+  const actual_operation nop = { &ISA[0], "NOP" };
+  return nop;
 }
 
 std::unique_ptr<Program> rga_disasm_compute::parse(const std::string &input) {
   std::cout << "rga_disasm_compute parsing" << std::endl;
   std::vector<std::string> lines;
 
-  std::string currentline = currentline;
+  std::string currentline = "";
   for (const char c : input) {
     switch (c) {
     case '\r':
@@ -88,14 +102,10 @@ std::unique_ptr<Program> rga_disasm_compute::parse(const std::string &input) {
   if (fe == lines.end()) {
     FAIL("Too Much ASM!");
   }
-  std::vector<const operation *> ops;
+  std::vector<actual_operation> ops;
+ 
   while (++fs != fe) {
-    auto op = parseASM(*fs);
-    if (op != nullptr) {
-      ops.push_back(op);
-    } else {
-      ops.push_back(&ISA[0]);
-    }
+    ops.push_back(parseASM(*fs));
   }
   return std::make_unique<Program>(input, ops);
 }

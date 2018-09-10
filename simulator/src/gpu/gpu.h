@@ -20,7 +20,7 @@ inline std::ostream &operator<<(std::ostream &Str, size_tV const &v) {
 class GPU;
 class GPU_Component {
 public:
-  GPU_Component(const GPU &gpu, size_t id = 0, GPU_Component *parent = nullptr, std::string type = "");
+  GPU_Component(const GPU &gpu, size_t id = 0, GPU_Component *parent = nullptr, std::string& type = std::string());
   GPU_Component() = delete;
 
 public:
@@ -56,7 +56,8 @@ private:
 struct SimdLane : public GPU_Component {
 
   SimdLane(const GPU &gpu, size_t id = 0, GPU_Component *parent = nullptr);
-  bool tick(const operation &op);
+
+  bool tick(actual_operation op);
   Register VGPR;
   ExecutionUnit EX;
   size_t executionID() const;
@@ -65,13 +66,13 @@ struct SimdLane : public GPU_Component {
 
 struct SimdUnit : public GPU_Component {
   SimdUnit(size_t SLanes, const GPU &gpu, size_t id = 0, GPU_Component *parent = nullptr);
-  bool tick(const operation &op);
+  bool tick(const actual_operation op);
   std::vector<SimdLane> simdLanes;
 };
 
 struct ScalerUnit : public GPU_Component {
   ScalerUnit(const GPU &gpu, GPU_Component *parent = nullptr, size_t id = 0);
-  bool tick(const operation &op);
+  bool tick(const actual_operation op);
   Register SGPR;
   ExecutionUnit EX;
 };
@@ -79,7 +80,7 @@ struct ScalerUnit : public GPU_Component {
 struct ComputeUnit : public GPU_Component {
   ComputeUnit(size_t SimdUs, size_t SLanes, const GPU &gpu, size_t id = 0, GPU_Component *parent = nullptr);
   std::vector<SimdUnit> simdUnits;
-  bool tick(const operation &op);
+  bool tick(const actual_operation op);
   ScalerUnit SU;
   Register LDS;
 };
@@ -100,7 +101,7 @@ public:
   size_t active_lanes;
   //
   void launchParameters(size_tV lp);
-  bool tick(const operation &op);
+  bool tick(const actual_operation op);
   size_t tickcount;
   enum GPUstate { READY, END, CRASH };
   GPUstate state;

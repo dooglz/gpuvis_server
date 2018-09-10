@@ -4,14 +4,20 @@
 #include <memory>
 #include <string>
 
+typedef std::string operand;
+
+struct actual_operation {
+  const operation *op;
+  const operand oa;
+};
+
 namespace parser {
 class Program {
 public:
-  Program(std::string raw, std::vector<const operation *> &_ops);
+  Program(std::string raw, std::vector<actual_operation> &_ops);
   ~Program();
   const std::string raw;
-  const std::vector<const operation *> ops;
-
+  const std::vector<actual_operation> ops;
 
 private:
 };
