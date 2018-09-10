@@ -1,13 +1,13 @@
 #include "../isa/fiji.h"
 #include "../parser.h"
 #include "gpu.h"
-#include <algorithm>
+//#include <algorithm>
 #include <array>
 #include <cmath>
-#include <execution>
+//#include <execution>
 #include <iostream>
 #include <stack>
-#include <utility>
+//#include <utility>
 #define CUSHIFT(gi) (gi >> 0) & 0xFF
 #define SUSHIFT(gi) (gi >> 8) & 0xFF
 #define SLSHIFT(gi) (gi >> 16) & 0xFF
@@ -19,8 +19,12 @@ void idToCmp(size_t gi, uint8_t &CU, uint8_t &SU, uint8_t &SL) {
 }
 auto idToStr(size_t gi) {
   const std::array<size_t, 3> a = {CUSHIFT(gi), SUSHIFT(gi), SLSHIFT(gi)};
-  return std::accumulate(std::next(a.begin()), a.end(), std::to_string(a[0]),
-                         [](std::string a, size_t b) { return (b == 0 ? a : a + "_" + (std::to_string(b))); });
+  // return std::accumulate(std::next(a.begin()), a.end(), std::to_string(a[0]),
+  //                        [](std::string a, size_t b) { return (b == 0 ? a : a + "_" + (std::to_string(b))); });
+  std::string str;
+  for (auto b : a) {
+    str += (b == 0 ? "" : "_" + std::to_string(b));
+  }
 }
 
 auto getGlobalID = [](GPU_Component *parent, size_t id, uint8_t dim) {
@@ -47,7 +51,7 @@ auto getGlobalID = [](GPU_Component *parent, size_t id, uint8_t dim) {
     shift += storagebits;
   }
 
- // uint8_t x, y, z;
+  // uint8_t x, y, z;
   // glambda2(global_id, x, y, z);
 
   return global_id;
