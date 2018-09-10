@@ -17,7 +17,7 @@ void idToCmp(size_t gi, uint8_t &CU, uint8_t &SU, uint8_t &SL) {
   SU = SUSHIFT(gi);
   SL = SLSHIFT(gi);
 }
-auto idToStr(size_t gi) {
+std::string idToStr(size_t gi) {
   const std::array<size_t, 3> a = {CUSHIFT(gi), SUSHIFT(gi), SLSHIFT(gi)};
   // return std::accumulate(std::next(a.begin()), a.end(), std::to_string(a[0]),
   //                        [](std::string a, size_t b) { return (b == 0 ? a : a + "_" + (std::to_string(b))); });
@@ -25,6 +25,7 @@ auto idToStr(size_t gi) {
   for (auto b : a) {
     str += (b == 0 ? "" : "_" + std::to_string(b));
   }
+  return str;
 }
 
 auto getGlobalID = [](GPU_Component *parent, size_t id, uint8_t dim) {
@@ -127,4 +128,17 @@ void GPU::launchParameters(size_tV lp) {
   active_cus = static_cast<size_t>(ceil(double(lp.x * lp.y * lp.z) / double(_SLanes * _SimdUs)));
   active_lanes = lp.x * lp.y * lp.z;
   std::cout << "gpu: launch: " << lp << " cus:" << active_cus << std::endl;
+}
+
+const std::vector<Register *> GPU::GetAllRegisters() {
+  std::vector<Register *> ret;
+  for (auto& a : computeUnits) {
+    for (auto& b : a.simdUnits) {
+      for (auto& c : b.simdLanes) {
+        ret.emplace_back(&c.VGPR);
+      }
+    }
+    ret.emplace_back(&a.SU.SGPR);
+  }
+  return ret;
 }

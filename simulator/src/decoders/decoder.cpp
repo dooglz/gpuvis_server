@@ -44,19 +44,35 @@ bool rga_disasm_compute::compatible(const std::string &input) {
   return beginsWith(input, "ShaderType = IL_SHADER_COMPUTE");
 }
 
-
 const operand parseOperand(const std::string &input) {
-  const auto tokens = split<std::string>(input, " ,");
-  if (tokens.size() > 1) {
-    operand ret = tokens[1];
-    for (size_t i = 2; i < tokens.size(); i++)
-    {
-      if (tokens[i] == "//") { break; }
-      ret += (", "+tokens[i]);
+  std::string raw = input;
+  bool isRegister = (input[0] == 's' || input[0] == 'v');
+  bool isConstant = !isRegister;
+  bool isAddress = false; // todo
+  bool isScaler = isRegister && (input[0] == 's');
+  std::vector<uint8_t> regs;
+  if (isRegister) {
+    if (input[1] == '[') {
+
+    } else {
+      regs.emplace_back(std::stoi(&input[1]));
     }
-    return ret;
   }
-  return "";
+  operand ret{raw, isRegister, isConstant, isAddress, isScaler, regs};
+  return ret;
+}
+bool validateOperation(const actual_operation &op) {
+  for (auto r : op.op->reads) {
+    if (r > op.oa.size()) {
+      throw("not enough operands");
+    }
+  }
+  for (auto w : op.op->writes) {
+    if (w > op.oa.size()) {
+      throw("not enough operands");
+    }
+  }
+  return true;
 }
 
 const actual_operation rga_disasm_compute::parseASM(const std::string &input) {
@@ -65,12 +81,21 @@ const actual_operation rga_disasm_compute::parseASM(const std::string &input) {
     const std::string opcode = tokens[0];
     for (auto &opi : ISA) {
       if (opi.opcode_str == opcode) {
-          return { &opi, parseOperand(input) };
+        std::vector<operand> operands;
+        for (size_t i = 1; i < tokens.size(); i++) {
+          if (tokens[i] == "//") {
+            break;
+          }
+          operands.emplace_back(parseOperand(tokens[i]));
+        }
+        actual_operation ret = {&opi, operands};
+        validateOperation(ret);
+        return ret;
       }
     }
   }
   std::cerr << "asm: UNKOWN: " << input << std::endl;
-  const actual_operation nop = { &ISA[0], "NOP" };
+  const actual_operation nop = {&ISA[0], {operand("nop")}};
   return nop;
 }
 
@@ -78,7 +103,7 @@ std::unique_ptr<Program> rga_disasm_compute::parse(const std::string &input) {
   std::cout << "rga_disasm_compute parsing" << std::endl;
   std::vector<std::string> lines;
 
-  std::string currentline = "";
+  std::string currentline = currentline;
   for (const char c : input) {
     switch (c) {
     case '\r':
@@ -105,7 +130,7 @@ std::unique_ptr<Program> rga_disasm_compute::parse(const std::string &input) {
     FAIL("Too Much ASM!");
   }
   std::vector<actual_operation> ops;
- 
+
   while (++fs != fe) {
     ops.push_back(parseASM(*fs));
   }
