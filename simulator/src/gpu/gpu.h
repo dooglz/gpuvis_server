@@ -20,7 +20,7 @@ inline std::ostream &operator<<(std::ostream &Str, size_tV const &v) {
 class GPU;
 class GPU_Component {
 public:
-  GPU_Component(const GPU &gpu, size_t id = 0, GPU_Component *parent = nullptr, std::string& type = std::string());
+  GPU_Component(const GPU &gpu, size_t id = 0, GPU_Component *parent = nullptr, std::string type = "");
   GPU_Component() = delete;
 
 public:

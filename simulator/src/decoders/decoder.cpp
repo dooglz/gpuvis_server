@@ -51,8 +51,10 @@ const operand parseOperand(const std::string &input) {
     operand ret = tokens[1];
     for (size_t i = 2; i < tokens.size(); i++)
     {
-      ret += ("_"+tokens[i]);
+      if (tokens[i] == "//") { break; }
+      ret += (", "+tokens[i]);
     }
+    return ret;
   }
   return "";
 }

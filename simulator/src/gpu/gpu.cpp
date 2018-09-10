@@ -34,7 +34,7 @@ bool GPU::tick(const actual_operation op) {
   if (op.op->opcode == s_endpgm) {
     state = END;
   }
-  std::cout << "gpu: processing: " << op.op->opcode_str << std::endl;
+  std::cout << "gpu: processing: " << op.op->opcode_str << " -- " << op.oa << std::endl;
   bool ret = true;
   for (size_t i = 0; i < active_cus; ++i) {
     ret &= computeUnits[i].tick(op);

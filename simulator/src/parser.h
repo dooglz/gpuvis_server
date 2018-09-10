@@ -4,12 +4,6 @@
 #include <memory>
 #include <string>
 
-typedef std::string operand;
-
-struct actual_operation {
-  const operation *op;
-  const operand oa;
-};
 
 namespace parser {
 class Program {
