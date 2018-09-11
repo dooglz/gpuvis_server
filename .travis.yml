@@ -68,6 +68,15 @@ matrix:
           packages:
             - clang-6.0
 
+#addons:
+#  coverity_scan:
+#    project:
+#      name: "dooglz/gpuvis_server"
+#      description: ""
+#    build_command_prepend: "<Your build preprocessing command here>"
+#    build_command: "<Your build command here>"
+#    branch_pattern: coverity_scan
+
 ################
 # build script #
 ################
