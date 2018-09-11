@@ -1,4 +1,5 @@
 #include "gpuvis.h"
+#include "output.h"
 #include "parser.h"
 #include "simulator.h"
 #include <string>
@@ -16,7 +17,7 @@ auto findpgrm(int id) {
   return a;
 }
 
-const int gpuvis::loadProgram(const std::string &pgrm) {
+const int gpuvis::loadProgram(const std::string& pgrm) {
   auto a = parser::parse(pgrm);
   if (a != nullptr) {
     simulator::pgrmstats(*a);
@@ -32,9 +33,10 @@ const int gpuvis::runProgram(int pgrmid, int gpuid) {
   return (result ? 1 : 0);
 }
 
-void gpuvis::summary(int pgrmid, int gpuid) {
+std::string gpuvis::summary(int pgrmid, int gpuid) {
   auto a = findpgrm(pgrmid);
-  return simulator::summary(*(a->second), gpuid);
+  simulator::summary(*(a->second), gpuid);
+  return output::gimmyjson();
 }
 
 const int gpuvis::initGPU() { return simulator::init(); }

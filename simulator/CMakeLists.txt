@@ -5,3 +5,8 @@ add_library(gpuvis_simulator SHARED ${SOURCE_FILES})
 include(GenerateExportHeader)
 GENERATE_EXPORT_HEADER(gpuvis_simulator)
 target_include_directories(gpuvis_simulator PUBLIC ${CMAKE_CURRENT_BINARY_DIR})
+
+add_library(json INTERFACE)
+target_sources(json INTERFACE "lib/json.hpp")
+target_include_directories(json INTERFACE "lib")
+target_link_libraries(gpuvis_simulator PRIVATE json)
