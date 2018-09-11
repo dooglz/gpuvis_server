@@ -53,7 +53,13 @@ const operand parseOperand(const std::string &input) {
   std::vector<uint8_t> regs;
   if (isRegister) {
     if (input[1] == '[') {
-
+      const auto tokens = split<std::string>(input, "[:]");
+      const auto min = std::stoi(tokens[1]);
+      const auto max = std::stoi(tokens[2]);
+      for (auto i = min; i <= max; i++) {
+        regs.push_back(i);
+      }
+      int a = 2;
     } else {
       regs.emplace_back(std::stoi(&input[1]));
     }

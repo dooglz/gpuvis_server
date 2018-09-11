@@ -3,7 +3,7 @@
 #include "../parser.h"
 #include <iostream>
 
-const void Register::read(const operand &addr) {
+const void Register::read(const operand& addr) {
   if (addr.isRegister) {
     for (auto r : addr.regs) {
       reads[_gpu.tickcount].push_back(r);
@@ -12,7 +12,7 @@ const void Register::read(const operand &addr) {
     reads[_gpu.tickcount].push_back(128);
   }
 }
-const void Register::write(const operand &addr) {
+const void Register::write(const operand& addr) {
   if (addr.isRegister) {
     for (auto r : addr.regs) {
       writes[_gpu.tickcount].push_back(r);
@@ -23,15 +23,19 @@ const void Register::write(const operand &addr) {
 }
 
 bool ComputeUnit::tick(const actual_operation op) {
+  bool ret = true;
   if (op.op->type == SCALER) {
-
+    ret &= SU.tick(op);
   } else if (op.op->type == VECTOR) {
-    bool ret = true;
     for (auto& su : simdUnits) {
       ret &= su.tick(op);
     }
     return ret;
   } else if (op.op->type == FLAT) {
+    for (auto& su : simdUnits) {
+      ret &= su.tick(op);
+    }
+    return ret;
   }
 
   return true;
@@ -53,7 +57,15 @@ bool GPU::tick(const actual_operation op) {
 
   std::cout << "gpu: processing: " << op.op->opcode_str << " -- ";
   for (auto a : op.oa) {
-    std::cout << a.raw << ", ";
+    if (a.isRegister) {
+      std::cout << ", [";
+      for (auto r : a.regs) {
+        std::cout << +r << ",";
+      }
+      std::cout << "]";
+    } else {
+      std::cout << ", " << a.raw;
+    }
   }
   std::cout << std::endl;
   bool ret = true;
