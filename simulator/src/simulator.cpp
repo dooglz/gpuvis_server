@@ -14,13 +14,13 @@ const int init() {
   return key;
 }
 
-bool run(const parser::Program& pgrm, const int GPUID) {
+bool run(const parser::Program &pgrm, const int GPUID) {
   auto a = gpu_db.find(GPUID);
   if (a == gpu_db.end()) {
     throw("INVALID GPU ID");
     return false;
   }
-  GPU& gpu = *a->second;
+  GPU &gpu = *a->second;
   auto op = pgrm.ops.begin();
   while (gpu.state == GPU::READY && op != pgrm.ops.end()) {
     gpu.tick(*op);
@@ -33,7 +33,7 @@ bool run(const parser::Program& pgrm, const int GPUID) {
   return true;
 }
 
-void pgrmstats(const parser::Program& pgrm) {
+void pgrmstats(const parser::Program &pgrm) {
   std::cout << "---\nProgram Stats\n";
   std::map<opcode_type, size_t> opcount;
   size_t vregr = 0, vregw = 0, sregr = 0, sregw = 0;
@@ -58,45 +58,31 @@ void pgrmstats(const parser::Program& pgrm) {
   std::cout << "---" << std::endl;
 }
 
-void summary(const parser::Program& pgrm, const int GPUID) {
+RegisterEventTicks GetRegisterEventTicks(GPU &gpu) {
+  std::map<size_t, std::vector<RegisterEvent>> events;
+  const auto regs = gpu.GetAllRegisters();
+  const auto lasttick = gpu.tickcount;
+  for (size_t i = 0; i < lasttick; i++) {
+    // std::cout << "---TICK " << i << "--- " << pgrm.ops[i].op->opcode_str  << "\n";
+    for (auto r : regs) {
+      std::string who = idToStr(r->_globalId);
+      std::vector<uint8_t> reads = r->reads[i];
+      std::vector<uint8_t> writes = r->writes[i];
+      if (!reads.empty() || !writes.empty()) {
+        events[i].push_back({who, reads, writes});
+      }
+    }
+  }
+  return events;
+}
+
+SimulationSummary summary(const parser::Program &pgrm, const int GPUID) {
   auto a = gpu_db.find(GPUID);
   if (a == gpu_db.end()) {
     throw("INVALID GPU ID");
   }
-  GPU& gpu = *a->second;
-  std::cout << "\n Memory Replay \n";
-  auto regs = gpu.GetAllRegisters();
-  const auto lasttick = gpu.tickcount;
-  for (size_t i = 0; i < lasttick; i++) {
-    std::cout << "---TICK " << i << "--- " << pgrm.ops[i].op->opcode_str << pgrm.ops[i]
-              << "\n";
-    for (auto r : regs) {
-      bool print = false;
-      // std::cout << r->_globalId << " -- " << idToStr(r->_globalId) << "\n";
-      if (!r->reads[i].empty()) {
-        std::cout << idToStr(r->_globalId) << "\t:R:";
-        for (auto r : r->reads[i]) {
-          std::cout << +r << ",";
-        }
-        print = true;
-      }
-      if (!r->writes[i].empty()) {
-        if (!print) {
-          std::cout << idToStr(r->_globalId) << "\t";
-        }
-        std::cout << " __ W:";
-        for (auto w : r->writes[i]) {
-          std::cout << +w << ",";
-        }
-        print = true;
-      }
-      if (print) {
-        std::cout << "\n";
-      }
-    }
-  }
-
-  std::cout << "---" << std::endl;
+  GPU &gpu = *a->second;
+  return {GetRegisterEventTicks(gpu)};
 }
 
 } // namespace simulator

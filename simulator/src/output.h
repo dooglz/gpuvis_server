@@ -1,13 +1,21 @@
 #pragma once
 #include "json.hpp"
+#include "simulator.h"
 #include <string>
 using json = nlohmann::json;
-namespace output {
-std::string gimmyjson() {
-  auto j = R"({
-    "happy": true,
-    "pi": 3.141
-  })"_json;
-  return j.dump();
+
+namespace simulator {
+void to_json(json &j, const SimulationSummary &s) { j = json{{"registerEventTicks", s.registerEventTicks}}; }
+void to_json(json &j, const RegisterEvent &re) {
+  j = json{{"who", re.who}, {"reads", re.reads}, {"writes", re.writes}};
 }
+} // namespace simulator
+
+namespace output {
+
+std::string gimmyjson(simulator::SimulationSummary &simsum) {
+  auto j = json(simsum);
+  return j.dump(1);
+}
+
 } // namespace output

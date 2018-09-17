@@ -7,11 +7,10 @@ struct size_tV {
   size_t y;
   size_t z;
   operator std::string() const {
-    return ('(' + std::to_string(x) + ',' + std::to_string(y) + ',' + std::to_string(z) +
-            ')');
+    return ('(' + std::to_string(x) + ',' + std::to_string(y) + ',' + std::to_string(z) + ')');
   }
 };
-inline std::ostream& operator<<(std::ostream& Str, size_tV const& v) {
+inline std::ostream &operator<<(std::ostream &Str, size_tV const &v) {
   Str << std::string(v);
   return Str;
 }
@@ -21,29 +20,28 @@ inline std::ostream& operator<<(std::ostream& Str, size_tV const& v) {
 class GPU;
 class GPU_Component {
 public:
-  GPU_Component(const GPU& gpu, size_t id = 0, GPU_Component* parent = nullptr,
-                std::string type = "");
+  GPU_Component(const GPU &gpu, size_t id = 0, GPU_Component *parent = nullptr, std::string type = "");
   GPU_Component() = delete;
-  GPU_Component(const GPU_Component&) = delete;
-  GPU_Component(GPU_Component&&) = default;
+  GPU_Component(const GPU_Component &) = delete;
+  GPU_Component(GPU_Component &&) = default;
 
 public:
-  const GPU& _gpu;
+  const GPU &_gpu;
   const size_t _localId;
   const size_t _globalId;
-  const GPU_Component* _parent;
+  const GPU_Component *_parent;
   const std::string _type;
 };
 
 class Register : public GPU_Component {
 public:
-  Register(const GPU& gpu, GPU_Component* parent = nullptr, size_t id = 0);
+  Register(const GPU &gpu, GPU_Component *parent = nullptr, size_t id = 0);
   Register() = delete;
-  Register(const Register&) = delete;
-  Register(Register&&) = default;
+  Register(const Register &) = delete;
+  Register(Register &&) = default;
   ~Register() = default;
-  const void read(const operand& addr);
-  const void write(const operand& addr);
+  const void read(const operand &addr);
+  const void write(const operand &addr);
 
   std::map<size_t, std::vector<uint8_t>> reads;
   std::map<size_t, std::vector<uint8_t>> writes;
@@ -54,8 +52,8 @@ private:
 class ExecutionUnit {
 public:
   ExecutionUnit() = default;
-  ExecutionUnit(const ExecutionUnit&) = delete;
-  ExecutionUnit(ExecutionUnit&&) = default;
+  ExecutionUnit(const ExecutionUnit &) = delete;
+  ExecutionUnit(ExecutionUnit &&) = default;
   ~ExecutionUnit() = default;
 
 private:
@@ -63,9 +61,9 @@ private:
 
 struct SimdLane : public GPU_Component {
 
-  SimdLane(const GPU& gpu, size_t id = 0, GPU_Component* parent = nullptr);
-  SimdLane(const SimdLane&) = delete;
-  SimdLane(SimdLane&&) = default;
+  SimdLane(const GPU &gpu, size_t id = 0, GPU_Component *parent = nullptr);
+  SimdLane(const SimdLane &) = delete;
+  SimdLane(SimdLane &&) = default;
   bool tick(actual_operation op);
   Register VGPR;
   ExecutionUnit EX;
@@ -74,29 +72,28 @@ struct SimdLane : public GPU_Component {
 };
 
 struct SimdUnit : public GPU_Component {
-  SimdUnit(size_t SLanes, const GPU& gpu, size_t id = 0, GPU_Component* parent = nullptr);
-  SimdUnit(const SimdUnit&) = delete;
-  SimdUnit(SimdUnit&&) = default;
+  SimdUnit(size_t SLanes, const GPU &gpu, size_t id = 0, GPU_Component *parent = nullptr);
+  SimdUnit(const SimdUnit &) = delete;
+  SimdUnit(SimdUnit &&) = default;
   bool tick(actual_operation op);
   std::vector<SimdLane> simdLanes;
 };
 
 struct ScalerUnit : public GPU_Component {
-  ScalerUnit(const GPU& gpu, GPU_Component* parent = nullptr, size_t id = 0);
-  ScalerUnit(const ScalerUnit&) = delete;
-  ScalerUnit(ScalerUnit&&) = default;
+  ScalerUnit(const GPU &gpu, GPU_Component *parent = nullptr, size_t id = 0);
+  ScalerUnit(const ScalerUnit &) = delete;
+  ScalerUnit(ScalerUnit &&) = default;
   bool tick(actual_operation op);
   Register SGPR;
   ExecutionUnit EX;
 };
 
 struct ComputeUnit : public GPU_Component {
-  ComputeUnit(size_t SimdUs, size_t SLanes, const GPU& gpu, size_t id = 0,
-              GPU_Component* parent = nullptr);
+  ComputeUnit(size_t SimdUs, size_t SLanes, const GPU &gpu, size_t id = 0, GPU_Component *parent = nullptr);
   ComputeUnit() = delete;
-  ComputeUnit(const ComputeUnit&) = delete;
+  ComputeUnit(const ComputeUnit &) = delete;
 
-  ComputeUnit(ComputeUnit&&) = default;
+  ComputeUnit(ComputeUnit &&) = default;
 
   std::vector<SimdUnit> simdUnits;
   bool tick(actual_operation op);
@@ -110,7 +107,7 @@ class GPU {
 public:
   GPU(size_t CUs, size_t SimdUs, size_t SLanes);
   GPU() = delete;
-  GPU(const GPU&) = delete;
+  GPU(const GPU &) = delete;
   ~GPU();
   //
   std::vector<ComputeUnit> computeUnits;
@@ -127,8 +124,8 @@ public:
   enum GPUstate { READY, END, CRASH };
   GPUstate state;
   //
-  const std::vector<Register*> GetAllRegisters();
+  const std::vector<Register *> GetAllRegisters();
 };
 
-static void gpustats(const GPU& gpu);
+static void gpustats(const GPU &gpu);
 std::string idToStr(size_t gi);

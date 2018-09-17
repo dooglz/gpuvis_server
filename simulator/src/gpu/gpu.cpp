@@ -3,7 +3,7 @@
 #include "../parser.h"
 #include <iostream>
 
-const void Register::read(const operand& addr) {
+const void Register::read(const operand &addr) {
   if (addr.isRegister) {
     for (auto r : addr.regs) {
       reads[_gpu.tickcount].push_back(r);
@@ -12,7 +12,7 @@ const void Register::read(const operand& addr) {
     reads[_gpu.tickcount].push_back(128);
   }
 }
-const void Register::write(const operand& addr) {
+const void Register::write(const operand &addr) {
   if (addr.isRegister) {
     for (auto r : addr.regs) {
       writes[_gpu.tickcount].push_back(r);
@@ -27,12 +27,12 @@ bool ComputeUnit::tick(const actual_operation op) {
   if (op.op->type == SCALER) {
     ret &= SU.tick(op);
   } else if (op.op->type == VECTOR) {
-    for (auto& su : simdUnits) {
+    for (auto &su : simdUnits) {
       ret &= su.tick(op);
     }
     return ret;
   } else if (op.op->type == FLAT) {
-    for (auto& su : simdUnits) {
+    for (auto &su : simdUnits) {
       ret &= su.tick(op);
     }
     return ret;
@@ -43,7 +43,7 @@ bool ComputeUnit::tick(const actual_operation op) {
 
 bool SimdUnit::tick(const actual_operation op) {
   bool ret = true;
-  for (auto& sl : simdLanes) {
+  for (auto &sl : simdLanes) {
     ret &= sl.tick(op);
   }
   return ret;

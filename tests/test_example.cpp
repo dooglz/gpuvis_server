@@ -23,6 +23,14 @@ TEST(Simulator, basicprogram) {
   ASSERT_GT(res, 0);
 
   auto json = gpuvis::summary(pgrm, gpu);
+
   ASSERT_NE(json, "") << "empty JSON!";
-  std::cout << std::endl << json << std::endl;
+  std::cout << "output size:" << json.length() << std::endl;
+  if (json.length() > 512) {
+    std::cout << std::endl
+              << json.substr(0, 256) << "\n...\n"
+              << json.substr(json.length() - 256, json.length()) << std::endl;
+  } else {
+    std::cout << std::endl << json << std::endl;
+  }
 }
