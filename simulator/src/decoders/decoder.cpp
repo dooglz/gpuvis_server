@@ -109,7 +109,7 @@ std::unique_ptr<Program> rga_disasm_compute::parse(const std::string &input) {
   std::cout << "rga_disasm_compute parsing" << std::endl;
   std::vector<std::string> lines;
 
-  std::string currentline = currentline;
+  std::string currentline;
   for (const char c : input) {
     switch (c) {
     case '\r':
@@ -140,6 +140,7 @@ std::unique_ptr<Program> rga_disasm_compute::parse(const std::string &input) {
   while (++fs != fe) {
     ops.push_back(parseASM(*fs));
   }
+
   return std::make_unique<Program>(input, ops);
 }
 
