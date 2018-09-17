@@ -6,7 +6,7 @@
 #include <string>
 extern void InitBridge();
 extern void ShutdownBridge();
-void inputFile(const std::string &ip);
+std::string inputFile(const std::string &ip);
 
 static const char *s_http_port = "8000";
 static uintmax_t reqs;
@@ -44,7 +44,13 @@ static void ev_handler(struct mg_connection *c, int ev, void *p) {
     if (cstr != NULL) {
       const auto str = std::string(cstr);
       std::cout << "File upload done: \n\n" << str << "\n\n" << std::endl;
-      inputFile(str);
+      try {
+        inputFile(str);
+      } catch (const std::exception &e) {
+        std::cerr << "THROW: " << e.what() << std::endl;
+      } catch (...) {
+        std::cerr << "THROW...: " << std::endl;
+      }
     }
     free(cstr);
     break;
