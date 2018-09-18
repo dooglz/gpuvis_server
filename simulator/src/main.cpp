@@ -33,10 +33,17 @@ const int gpuvis::runProgram(int pgrmid, int gpuid) {
   return (result ? 1 : 0);
 }
 
-std::string gpuvis::summary(int pgrmid, int gpuid) {
+simulator::SimulationSummary summary(int pgrmid, int gpuid) {
   auto a = findpgrm(pgrmid);
-  auto sum = simulator::summary(*(a->second), gpuid);
-  return output::gimmyjson(sum);
+  return simulator::summary(*(a->second), gpuid);
 }
 
+std::string gpuvis::summaryJSON(int pgrmid, int gpuid) {
+
+  return output::gimmyjson(summary(pgrmid, gpuid));
+}
+
+std::vector<std::uint8_t> gpuvis::summaryMSGPK(int pgrmid, int gpuid) {
+  return output::gimmyMsgPack(summary(pgrmid, gpuid));
+}
 const int gpuvis::initGPU() { return simulator::init(); }

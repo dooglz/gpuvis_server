@@ -5,17 +5,18 @@
 using json = nlohmann::json;
 
 namespace simulator {
-void to_json(json &j, const SimulationSummary &s) { j = json{{"registerEventTicks", s.registerEventTicks}}; }
+void to_json(json &j, const SimulationSummary &s) { j = json{{"rET", s.registerEventTicks}}; }
 void to_json(json &j, const RegisterEvent &re) {
-  j = json{{"who", re.who}, {"reads", re.reads}, {"writes", re.writes}};
+  j = json{{"id", re.who}, {"r", re.reads}, {"w", re.writes}};
 }
 } // namespace simulator
 
 namespace output {
 
-std::string gimmyjson(simulator::SimulationSummary &simsum) {
-  auto j = json(simsum);
-  return j.dump(1);
+std::string gimmyjson(simulator::SimulationSummary &simsum) { return json(simsum).dump(); }
+
+std::vector<std::uint8_t> gimmyMsgPack(simulator::SimulationSummary &simsum) {
+  return json::to_msgpack(json(simsum));
 }
 
 } // namespace output

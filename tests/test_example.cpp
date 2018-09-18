@@ -22,7 +22,7 @@ TEST(Simulator, basicprogram) {
   auto res = gpuvis::runProgram(pgrm, gpu);
   ASSERT_GT(res, 0);
 
-  auto json = gpuvis::summary(pgrm, gpu);
+  auto json = gpuvis::summaryJSON(pgrm, gpu);
 
   ASSERT_NE(json, "") << "empty JSON!";
   std::cout << "output size:" << json.length() << std::endl;
