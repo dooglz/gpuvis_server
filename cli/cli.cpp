@@ -12,7 +12,7 @@ static const std::string base64_chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
                                         "abcdefghijklmnopqrstuvwxyz"
                                         "0123456789+/";
 
-std::string base64_encode(unsigned char const *bytes_to_encode, unsigned int in_len) {
+std::string base64_encode(unsigned char const* bytes_to_encode, unsigned int in_len) {
   std::string ret;
   int i = 0;
   int j = 0;
@@ -51,7 +51,7 @@ std::string base64_encode(unsigned char const *bytes_to_encode, unsigned int in_
   return ret;
 }
 
-void inputFile(const std::string &ip) {
+void inputFile(const std::string& ip) {
 
   std::ifstream t(ip);
   std::string str((std::istreambuf_iterator<char>(t)), std::istreambuf_iterator<char>());
@@ -80,11 +80,12 @@ void inputFile(const std::string &ip) {
       throw std::runtime_error("Problem json");
     }
     if (b64) {
-      json = base64_encode(reinterpret_cast<const unsigned char *>(json.c_str()), json.length());
+      json = base64_encode(reinterpret_cast<const unsigned char*>(json.c_str()),
+                           json.length());
     }
     if (outputfile != "") {
       std::ofstream fout(outputfile, std::ios::out | std::ios::binary);
-      fout.write((char *)&json[0], json.size() * sizeof(char));
+      fout.write((char*)&json[0], json.size() * sizeof(char));
       fout.close();
     } else {
       std::cout << json << std::endl;
@@ -99,17 +100,18 @@ void inputFile(const std::string &ip) {
     if (outputfile != "") {
       std::ofstream fout(outputfile, std::ios::out | std::ios::binary);
       if (b64) {
-        std::string b64s = base64_encode(reinterpret_cast<const unsigned char *>(&msgpk[0]), msgpk.size());
-        fout.write((char *)&b64s[0], b64s.size() * sizeof(char));
-      }else{
-        fout.write((char *)&msgpk[0], msgpk.size() * sizeof(uint8_t));
+        std::string b64s = base64_encode(
+            reinterpret_cast<const unsigned char*>(&msgpk[0]), msgpk.size());
+        fout.write((char*)&b64s[0], b64s.size() * sizeof(char));
+      } else {
+        fout.write((char*)&msgpk[0], msgpk.size() * sizeof(uint8_t));
       }
-     
-      
+
       fout.close();
     } else {
       if (b64) {
-        std::string b64s = base64_encode(reinterpret_cast<const unsigned char *>(&msgpk[0]), msgpk.size());
+        std::string b64s = base64_encode(
+            reinterpret_cast<const unsigned char*>(&msgpk[0]), msgpk.size());
         std::cout << b64s << std::endl;
       } else {
         for (size_t i = 0; i < msgpk.size(); i++) {
@@ -123,7 +125,7 @@ void inputFile(const std::string &ip) {
   }
 }
 
-int main(int argc, char **argv) {
+int main(int argc, char** argv) {
 
   CLI::App app("GPUVIS Server CLI");
   std::string file;
@@ -133,26 +135,25 @@ int main(int argc, char **argv) {
   app.add_flag("-b,--b64,", b64, "Base64 Encode Output");
 
   CLI11_PARSE(app, argc, argv);
- 
+  /*
   mp = true;
   b64 = true;
   outputfile = "output/mp_b64.txt";
-
+  */
   try {
     inputFile(file);
-  } catch (const std::exception &e) {
+  } catch (const std::exception& e) {
     std::cerr << "ERROR: " << e.what() << std::endl;
     return 1;
   }
-
+  return 0;
   mp = true;
   b64 = false;
   outputfile = "output/mp.bin";
 
   try {
     inputFile(file);
-  }
-  catch (const std::exception &e) {
+  } catch (const std::exception& e) {
     std::cerr << "ERROR: " << e.what() << std::endl;
     return 1;
   }
@@ -163,12 +164,10 @@ int main(int argc, char **argv) {
 
   try {
     inputFile(file);
-  }
-  catch (const std::exception &e) {
+  } catch (const std::exception& e) {
     std::cerr << "ERROR: " << e.what() << std::endl;
     return 1;
   }
-
 
   mp = false;
   b64 = true;
@@ -176,13 +175,10 @@ int main(int argc, char **argv) {
 
   try {
     inputFile(file);
-  }
-  catch (const std::exception &e) {
+  } catch (const std::exception& e) {
     std::cerr << "ERROR: " << e.what() << std::endl;
     return 1;
   }
-
-
 
   return 0;
 }

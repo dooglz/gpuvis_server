@@ -1,33 +1,47 @@
 <!DOCTYPE html>
 <html>
+
 <head>
   <title>AJAX Upload Example</title>
+  <script src="msgpack.min.js"></script>
   <script src="jquery-3.3.1.min.js"></script>
   <script type="text/javascript">
     function updateProgress(evt) {
       if (evt.lengthComputable) {
-        document.getElementById("output").textContent =
-              "Uploaded " + evt.loaded + " of " + evt.total + " bytes";
+        $("#output").text("Uploaded " + evt.loaded + " of " + evt.total + " bytes");
       }
     }
+    var result_data;
+    var decoded_data;
     function uploadFile() {
+
       var file_data = new FormData(document.getElementById('filename'));
       $.ajax({
-        url: "/",
+        url: "http://localhost:3000/upload",
         type: "POST",
         data: file_data,
         processData: false,
         contentType: false,
         cache: false,
-        xhr: function() {
+        xhrFields: {
+          responseType: 'blob'
+        },
+        xhr: function () {
           myXhr = $.ajaxSettings.xhr();
-          if(myXhr.upload){
-            myXhr.upload.addEventListener('progress',updateProgress, false); // for handling the progress of the upload
+          if (myXhr.upload) {
+            myXhr.upload.addEventListener('progress', updateProgress, false); // for handling the progress of the upload
           }
           return myXhr;
         },
-      }).done(function(data) {
-          document.getElementById("output").textContent = "Result: " + data;
+      }).done(function (data) {
+        result_data = data;
+        var reader = new FileReader();
+        reader.addEventListener("loadend", function () {
+          decoded_data = msgpack.decode(new Uint8Array(reader.result));
+          $("#output").html("Decoded Result! " + decoded_data.rET.length + " Register Events!<br>" + JSON.stringify(decoded_data).substr(0,1024));
+        });
+        reader.readAsArrayBuffer(result_data);
+        $("#output").html("Recieved Result: " + result_data.size );
       });
       return false;
     }
@@ -35,20 +49,14 @@
 </head>
 
 <body>
-  <h1>Upload file using standard form upload</h1>
-
-  <form method="POST" action="/" enctype="multipart/form-data">
-    <label>Select a file:</label><br>
-    <input type="file" name="file" />
-    <input type="submit" value="Upload" />
-  </form>
-
-  <h1>Upload file using Ajax - that also gives progress report</h1>
+  <h1>Manual file Upload</h1>
   <form method="post" id="filename" name="filename" onsubmit="return uploadFile();">
     <label>Select a file:</label><br>
-    <input type="file" id="file" name="file" required />
+    <input type="file" id="file" name="inputfile" required />
     <input type="submit" value="Upload" />
   </form>
-  <br><br><div id="output"></div>
+  <br><hr><br>
+  <div id="output"></div>
 </body>
+
 </html>
