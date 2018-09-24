@@ -33,7 +33,7 @@ const int gpuvis::runProgram(int pgrmid, int gpuid) {
   return (result ? 1 : 0);
 }
 
-simulator::SimulationSummary summary(int pgrmid, int gpuid) {
+const simulator::SimulationSummary summary(int pgrmid, int gpuid) {
   auto a = findpgrm(pgrmid);
   return simulator::summary(*(a->second), gpuid);
 }

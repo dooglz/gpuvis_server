@@ -13,9 +13,9 @@ void to_json(json &j, const RegisterEvent &re) {
 
 namespace output {
 
-std::string gimmyjson(simulator::SimulationSummary &simsum) { return json(simsum).dump(); }
+std::string gimmyjson(const simulator::SimulationSummary &simsum) { return json(simsum).dump(); }
 
-std::vector<std::uint8_t> gimmyMsgPack(simulator::SimulationSummary &simsum) {
+std::vector<std::uint8_t> gimmyMsgPack(const simulator::SimulationSummary &simsum) {
   return json::to_msgpack(json(simsum));
 }
 
