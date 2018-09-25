@@ -17,7 +17,7 @@
 
       var file_data = new FormData(document.getElementById('filename'));
       $.ajax({
-        url: "http://localhost:3000/upload",
+        url: "http://localhost/upload",
         type: "POST",
         data: file_data,
         processData: false,
