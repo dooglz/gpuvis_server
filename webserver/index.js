@@ -69,7 +69,12 @@ function dowork(fn, uuid, res) {
     outfile => {
       console.log("gpuvis done ", outfile);
       res.type('application/octet-stream');
-      res.sendFile(outfile);
+      try{
+        res.sendFile(outfile);
+      }catch(e){
+        console.error("Can't sendfile ", outfile, e );
+        res.status(500).send(uuid + " Internal Server Error");
+      }
       // res.send(200, 'gpuvis done! ');
     },
     error => {
@@ -80,11 +85,13 @@ function dowork(fn, uuid, res) {
 
 function parse(fn, uuid) {
   return new Promise(function(resolve, reject) {
-    let intfilename = intDir + uuid + '.bin';
+    let intfilename = '\"' + intDir + uuid + '.bin'+ '\"';
     let inputfilename = '\"' + fn + '\"';
+        console.log("Starting gpuvis");
     try {
-      const ls = spawn(gpuvis, [" -f "" + inputfilename, ' -o \"' + intfilename + '\"', ' -m '], {
-        windowsVerbatimArguments: true
+      const ls = spawn(gpuvis, ["-f " + inputfilename, "-o " + intfilename, "-m"], {
+        windowsVerbatimArguments: true,
+        shell: true
       });
 
       ls.on('error', function(e) {
@@ -102,8 +109,7 @@ function parse(fn, uuid) {
         console.log(`stderr: ${data}`);
       });
       ls.on('close', (code) => {
-
-        resolve(intfilename);
+        resolve(intDir + uuid + '.bin');
       });
 
     } catch (e) {
