@@ -6,7 +6,12 @@ const port = 80;
 const fs = require('fs');
 const filesavedir = process.cwd() + '/incomming/';
 const intDir = process.cwd() + '/output/';
-const gpuvis = '../../../BUILD/gpuvis_server/bin/Release/gpuvis_cli.exe';
+let gpuvis = '../../../BUILD/gpuvis_server/bin/Release/gpuvis_cli.exe';
+
+if (process.argv.length >= 2) {
+    gpuvis = process.argv[2];
+}
+
 const child_process = require('child_process');
 const spawn = child_process.spawn;
 
@@ -76,8 +81,9 @@ function dowork(fn, uuid, res) {
 function parse(fn, uuid) {
   return new Promise(function(resolve, reject) {
     let intfilename = intDir + uuid + '.bin';
+    let inputfilename = '\"' + fn + '\"';
     try {
-      const ls = spawn(gpuvis, ['-f ' + fn, '-o \"' + intfilename + '\"', '-m'], {
+      const ls = spawn(gpuvis, [" -f "" + inputfilename, ' -o \"' + intfilename + '\"', ' -m '], {
         windowsVerbatimArguments: true
       });
 
