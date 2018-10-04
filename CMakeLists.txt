@@ -11,6 +11,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 add_subdirectory(cli)
 add_subdirectory(simulator)
+add_subdirectory(webserver)
 
 include(CMakeDependentOption)
 option(GPUVIS_build_tests "Build and run unit tests." OFF)

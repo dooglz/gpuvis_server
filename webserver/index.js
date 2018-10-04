@@ -49,7 +49,7 @@ app.post('/upload', function(req, res) {
     }
     console.log(uuids, 'File saved', outputfilename);
     //res.send(200, 'File uploaded! ' + uuids);
-    dowork(outputfilename, uuid, res);
+    processUpload(outputfilename, uuid, inputfile, res);
   });
 });
 
@@ -62,10 +62,23 @@ app.post('/run', function(req, res) {
 })
 app.listen(port, () => console.log(`Example app listening on port ${port}!`));
 
-function dowork(fn, uuid, res) {
 
 
-  parse(fn, uuid).then(
+function processUpload(fileondisk, uuid, fileinMemory, res) {
+
+  let filetype = "NA";
+  if (fileinMemory.startsWith("ShaderType = IL_SHADER_COMPUTE")) {
+    filetype = "RGA_ASM_COMPUTE";
+  }
+
+  console.log(uuids, 'processUpload, filetype:', filetype);
+
+  if (filetype != "RGA_ASM_COMPUTE") {
+    res.status(400).send(uuid + " Can't read filetype:", filetype);
+    return;
+  }
+
+  runGpuVis(fileondisk, uuid).then(
     outfile => {
       console.log("gpuvis done ", outfile);
       res.type('application/octet-stream');
@@ -80,10 +93,9 @@ function dowork(fn, uuid, res) {
     error => {
       res.status(500).send(uuid + " Internal Server Error");
     });
-
 }
 
-function parse(fn, uuid) {
+function runGpuVis(fn, uuid) {
   return new Promise(function(resolve, reject) {
     let intfilename = '\"' + intDir + uuid + '.bin'+ '\"';
     let inputfilename = '\"' + fn + '\"';

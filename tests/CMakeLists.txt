@@ -78,8 +78,9 @@ if(NOT ${GTEST_FOUND})
 add_custom_target(copy_test_resources ALL 
   COMMAND ${CMAKE_COMMAND} -E copy_directory "${PROJECT_SOURCE_DIR}/testresources" ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIGURATION>/testresources
 )
-
-add_executable(Unit_Tests_run test_example.cpp)
+file(GLOB_RECURSE SOURCE_FILES testresources/*)
+set(SOURCE_FILES ${SOURCE_FILES} test_example.cpp)
+add_executable(Unit_Tests_run ${SOURCE_FILES})
 add_dependencies(Unit_Tests_run copy_test_resources gpuvis_simulator)
 target_link_libraries(Unit_Tests_run ${Gtest} gpuvis_simulator)
 #add_test(Unit_Tests_run Unit_Tests_run)
