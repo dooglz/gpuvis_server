@@ -13,9 +13,13 @@ if(NOT ${GTEST_FOUND})
    message(STATUS "Cloning Gtest")
     find_package(Git REQUIRED)
     execute_process(
-    COMMAND ${GIT_EXECUTABLE} clone --depth 1 https://github.com/google/googletest ${G_source}
+    COMMAND ${GIT_EXECUTABLE} clone https://github.com/google/googletest ${G_source}
     )
   endif()
+  execute_process(
+    COMMAND ${GIT_EXECUTABLE} checkout 2fe3bd994b
+    WORKING_DIRECTORY ${G_source}
+  )
   if(NOT gtest_built)
     set(G_build ${CMAKE_CURRENT_BINARY_DIR}/lib/googletest_build)
     set(G_install ${CMAKE_CURRENT_BINARY_DIR}/lib/googletest_install)
@@ -23,7 +27,7 @@ if(NOT ${GTEST_FOUND})
     #Configure Release Gtest
     file(MAKE_DIRECTORY ${G_build})
     message(STATUS "Configuring Gtest")
-    execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" ${G_source}  -DCMAKE_INSTALL_PREFIX=${G_install} -Dgtest_force_shared_crt=ON -DCMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS} /std=c++11"
+    execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" ${G_source}  -DCMAKE_INSTALL_PREFIX=${G_install} -Dgtest_force_shared_crt=ON
       RESULT_VARIABLE result
       WORKING_DIRECTORY ${G_build} 
     )
