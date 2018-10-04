@@ -3,7 +3,6 @@ find_package(GTest)
 include(GoogleTest)
 #set(GTEST_FOUND 0)
 #set(gtest_built 0)
-
 set (Gtest GTest::Main GTest::GTest)
 project(${CMAKE_PROJECT_NAME}_tests)
 if(NOT ${GTEST_FOUND})
@@ -24,7 +23,7 @@ if(NOT ${GTEST_FOUND})
     #Configure Release Gtest
     file(MAKE_DIRECTORY ${G_build})
     message(STATUS "Configuring Gtest")
-    execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" ${G_source}  -DCMAKE_INSTALL_PREFIX=${G_install} -Dgtest_force_shared_crt=ON
+    execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" ${G_source}  -DCMAKE_INSTALL_PREFIX=${G_install} -Dgtest_force_shared_crt=ON -DCMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS} /std=c++11"
       RESULT_VARIABLE result
       WORKING_DIRECTORY ${G_build} 
     )
