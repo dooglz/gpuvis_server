@@ -11,9 +11,9 @@ RUN CMAKE_URL="https://cmake.org/files/v3.12/cmake-3.12.1-Linux-x86_64.tar.gz" &
     mkdir cmake && wget -q  --no-check-certificate ${CMAKE_URL}
 RUN tar --strip-components=1 -C cmake -xz -f cmake-3.12.1-Linux-x86_64.tar.gz
 
-RUN echo "mkdir -p /build && cd /build && export CC=/usr/bin/clang-6.0 && export CXX=/usr/bin/clang++-6.0 && /cmake/bin/cmake /src -DGPUVIS_build_tests=ON && /cmake/bin/cmake --build . --config Release" >> /build.sh
+ADD build.sh /build.sh
 RUN chmod +x /build.sh
 
 EXPOSE 80
 #RUN cd /src/webserver && npm install
-CMD ./build.sh && cd ~ && node /src/webserver/index.js /build/bin/gpuvis_cli
+CMD  git clone https://github.com/dooglz/gpuvis_server.git /src || true && cd /src && git pull && cd / && ./build.sh && cd ~ && node /src/webserver/index.js /build/bin/gpuvis_cli
