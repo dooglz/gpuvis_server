@@ -6,7 +6,7 @@ sudo docker build -t gpuvis_server -f gpuvis_server.dockerfile . || exit 1;
 
 sudo docker run -d --name gpuvis_server \
 		--hostname=gpuvis_server \
-		-v `pwd`/../:/src \
+		--mount source=gpuvis_server_src,target=/src \
 		--restart=always \
 		-p 80:80 \
 		gpuvis_server || exit 1;
