@@ -11,8 +11,8 @@ const useHTTPS = true;
 let gpuvis = '../../../BUILD/gpuvis_server/bin/Release/gpuvis_cli.exe';
 
 var options = {
-    key: fs.readFileSync('ssl/private.key'),
-    cert: fs.readFileSync('ssl/soc-web-liv-32_napier_ac_uk.crt'),
+    key: fs.readFileSync('/ssl/private.key'),
+    cert: fs.readFileSync('/ssl/soc-web-liv-32_napier_ac_uk.crt'),
 };
 
 if (process.argv.length >= 2) {
