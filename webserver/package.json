@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/dooglz/gpuvis_server#readme",
   "dependencies": {
+    "command-line-args": "^5.0.2",
     "express": "^4.16.3",
     "express-fileupload": "^0.4.0",
     "uuid": "^3.3.2"

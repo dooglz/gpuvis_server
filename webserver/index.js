@@ -1,40 +1,51 @@
 const express = require('express');
 const fileUpload = require('express-fileupload');
 const uuidv4 = require('uuid/v4');
-const port = 443;
 const fs = require('fs');
 const https = require('https');
-const filesavedir = process.cwd() + '/incomming/';
-const intDir = process.cwd() + '/output/';
-const useHTTPS = true;
-if(useHTTPS === true){
- var http = require('http');
- var https_options = {
-    key: fs.readFileSync('/ssl/private.key'),
-    cert: fs.readFileSync('/ssl/soc-web-liv-32_napier_ac_uk.crt'),
-  };
+const commandLineArgs = require('command-line-args');
+
+const optionDefinitions = [
+  { name: 'verbose', alias: 'v', type: Boolean },
+  { name: 'gpuvis', alias: 'g', type: String },
+  { name: 'rga', alias: 'r', type: String },
+  { name: 'port', alias: 'p', type: Number, defaultValue: 80 },
+  { name: 'https', type: Boolean, defaultValue: false },
+  { name: 'key',  type: String },
+  { name: 'cert', type: String },
+  { name: 'filesavedir', type: String, defaultValue: process.cwd() + '/incomming/' },
+  { name: 'intDir', type: String, defaultValue: process.cwd() + '/output/' },
+]
+const options = commandLineArgs(optionDefinitions);
+
+if (options.https === true) {
+  if (options.port == 80) { options.port = 443;}
+  var http = require('http');
+  if (!options.key || !options.cert ||
+    options.key == "" || options.cert == "") {
+    console.error("Bad SSL key/cert");
+    process.exit(1);
+  }
+  try {
+    let key = fs.readFileSync(options.key);
+    let crt = fs.readFileSync(options.cert);
+    var https_options = { key: key, cert:crt };
+  }catch(e){
+    console.error("Bad SSL key/cert", e);
+    process.exit(1);
+  }
 }
-let gpuvis = '../../../BUILD/gpuvis_server/bin/Release/gpuvis_cli.exe';
-let rga = '/rga/rga'
+
 const child_process = require('child_process');
 const spawn = child_process.spawn;
 
 let app = express();
 
-if (process.argv.length >= 2) {
-    gpuvis = process.argv[2];
+if (!fs.existsSync(options.filesavedir)) {
+  fs.mkdirSync(options.filesavedir);
 }
-
-if (process.argv.length >= 3) {
- rga = process.argv[3];
-}
-
-
-if (!fs.existsSync(filesavedir)) {
-  fs.mkdirSync(filesavedir);
-}
-if (!fs.existsSync(intDir)) {
-  fs.mkdirSync(intDir);
+if (!fs.existsSync(options.intDir)) {
+  fs.mkdirSync(options.intDir);
 }
 
 app.use(fileUpload());
@@ -56,7 +67,7 @@ app.post('/upload', function(req, res) {
   let inputfile = req.files.inputfile;
   console.log(uuids, "file uploaded", inputfile.name);
 
-  let outputfilename = filesavedir + uuid + '.txt';
+  let outputfilename = options.filesavedir + uuid + '.txt';
   inputfile.mv(outputfilename, function(err) {
     if (err) {
       console.error(uuids, err);
@@ -76,10 +87,10 @@ app.post('/run', function(req, res) {
   console.log(req, res);
 })
 
-if(useHTTPS){
+if (options.https) {
   let server = https.createServer(https_options, app);
   server.on('error',(e)=>console.error("https server error, ",e));
-  server.listen(port, ()=>console.log("SSL, Listening on port "+server.address().port));
+  server.listen(options.port, () =>console.log("SSL, Listening on port " + server.address().port));
   let insecureserver = http.createServer((req, res)=>{
     res.writeHead(301, { "Location": "https://" + req.headers['host'] + req.url });
     res.end();
@@ -87,23 +98,23 @@ if(useHTTPS){
   insecureserver.on('error',(e)=>console.error("http server error, ",e));
   insecureserver.listen(80);
 }else{
-  app.listen(port, () => console.log(`Example app listening on port ${port}!`));
+  app.listen(options.port, () => console.log(`Example app listening on port ${options.port}!`));
 }
 
 
 function processUpload(fileondisk, uuid, fileinMemory, req, res) {
-
   let filetype = "NA";
-  if (fileinMemory.startsWith("ShaderType = IL_SHADER_COMPUTE")) {
+  const headder = fileinMemory.data.toString();
+  if (headder.startsWith("ShaderType = IL_SHADER_COMPUTE")) {
     filetype = "RGA_ASM_COMPUTE";
   }else if(req.filetype && req.filetype == "ocl"){
     filetype = "OCL_SOURCE"
   }
 
-  console.log(uuids, 'processUpload, filetype:', filetype);
+  console.log(uuid, 'processUpload, filetype:', filetype);
 
   if (filetype === "NA") {
-    res.status(400).send(uuid + " Can't read filetype:", filetype);
+    res.status(400).send(uuid + " Can't read filetype:" + filetype);
     return;
   }
 
@@ -120,17 +131,18 @@ function processUpload(fileondisk, uuid, fileinMemory, req, res) {
       // res.send(200, 'gpuvis done! ');
     },
     error => {
+      console.error("runGpuVis error", error);
       res.status(500).send(uuid + " Internal Server Error");
     });
 }
 
 function runGpuVis(fn, uuid) {
   return new Promise(function(resolve, reject) {
-    let intfilename = '\"' + intDir + uuid + '.bin'+ '\"';
+    let intfilename = '\"' + options.intDir + uuid + '.bin'+ '\"';
     let inputfilename = '\"' + fn + '\"';
         console.log("Starting gpuvis");
     try {
-      const ls = spawn(gpuvis, ["-f " + inputfilename, "-o " + intfilename, "-m"], {
+      const ls = spawn(options.gpuvis, ["-f " + inputfilename, "-o " + intfilename, "-m"], {
         windowsVerbatimArguments: true,
         shell: true
       });
@@ -150,7 +162,7 @@ function runGpuVis(fn, uuid) {
         console.log(`stderr: ${data}`);
       });
       ls.on('close', (code) => {
-        resolve(intDir + uuid + '.bin');
+        resolve(options.intDir + uuid + '.bin');
       });
 
     } catch (e) {
