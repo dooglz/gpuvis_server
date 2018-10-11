@@ -58,7 +58,7 @@ app.use(function (req, res, next) {
 });
 
 app.post('/upload', function (req, res) {
-
+  console.info("/upload");
   const uuid = uuidv4();
   const uuids = uuid.substr(0, 4);
   if (!req.files || !req.files.inputfile) {
@@ -121,7 +121,21 @@ function processUpload(fileondisk, uuid, fileinMemory, req, res) {
   }
 
   if (filetype === "RGA_ASM_COMPUTE") {
-
+    runGpuVis(fileondisk, uuid).then(
+      outfile => {
+        console.log("gpuvis done ", outfile);
+        res.type('application/octet-stream');
+        try {
+          res.sendFile(outfile);
+        } catch (e) {
+          console.error("Can't sendfile ", outfile, e);
+          res.status(500).send(uuid + " Internal Server Error");
+        }
+      },
+      error => {
+        console.error("runGpuVis error", error);
+        res.status(500).send(uuid + " Internal Server Error");
+      });
   } else if (filetype === "OCL_SOURCE") {
     res.status(200).send(uuid + " Can't do that yet");
     runRGA(fileondisk, uuid).then(
@@ -172,11 +186,11 @@ function runRGA(fn, uuid) {
       ls.on('close', (code) => {
         resolve(options.intDir + uuid + '.txt');
       });
-            //  let stdout = "";
-            ls.stdout.on('data', (data) => {
-              //stdout += `${data}`;
-              console.log(`stdout: ${data}`);
-            });
+      //  let stdout = "";
+      ls.stdout.on('data', (data) => {
+        //stdout += `${data}`;
+        console.log(`stdout: ${data}`);
+      });
     } catch (e) {
       console.error("Can't spawn Rga", e);
       reject(e);
