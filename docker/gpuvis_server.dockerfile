@@ -15,5 +15,6 @@ ADD build.sh /build.sh
 RUN chmod +x /build.sh
 
 EXPOSE 80
+EXPOSE 443
 #RUN cd /src/webserver && npm install
 CMD  git clone https://github.com/dooglz/gpuvis_server.git /src || true && cd /src && git pull && cd / && ./build.sh && cd ~ && node /src/webserver/index.js /build/bin/gpuvis_cli
