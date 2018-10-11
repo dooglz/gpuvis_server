@@ -69,9 +69,11 @@ app.post('/run', function(req, res) {
 })
 
 if(useHTTPS){
-	https.createServer(opts, app).listen(port, ()=>console.log("SSL, Listening on port "+listener.address().port));
+  let server = https.createServer(opts, app);
+  server.on('error',(e)=>console.error("https server error, ",e));
+  server.listen(port, ()=>console.log("SSL, Listening on port "+server.address().port));
 }else{
-	app.listen(port, () => console.log(`Example app listening on port ${port}!`));
+  app.listen(port, () => console.log(`Example app listening on port ${port}!`));
 }
 
 
