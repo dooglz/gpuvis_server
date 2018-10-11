@@ -17,4 +17,5 @@ RUN chmod +x /build.sh
 EXPOSE 80
 EXPOSE 443
 #RUN cd /src/webserver && npm install
-CMD  git clone https://github.com/dooglz/gpuvis_server.git /src || true && cd /src && git pull && cd / && ./build.sh && cd ~ && node /src/webserver/index.js /build/bin/gpuvis_cli
+CMD  git clone https://github.com/dooglz/gpuvis_server.git /src || true && cd /src && git pull && cd / && ./build.sh && cd ~ && \
+     node /src/webserver/index.js --gpuvis /build/bin/gpuvis_cli --rga /rga/rga --key /ssl/private.key --cert /ssl/soc-web-liv-32_napier_ac_uk.crt

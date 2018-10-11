@@ -63,7 +63,7 @@
       log("", "uploading " + $("#file")[0].value);
       var file_data = new FormData(document.getElementById('filename'));
       var aj = $.ajax({
-        url: "http://localhost/upload",
+        url: "/upload",
         type: "POST",
         data: file_data,
         processData: false,
