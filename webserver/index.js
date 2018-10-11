@@ -121,26 +121,69 @@ function processUpload(fileondisk, uuid, fileinMemory, req, res) {
   }
 
   if (filetype === "RGA_ASM_COMPUTE") {
-    runGpuVis(fileondisk, uuid).then(
+
+  } else if (filetype === "OCL_SOURCE") {
+    res.status(200).send(uuid + " Can't do that yet");
+    runRGA(fileondisk, uuid).then(
       outfile => {
-        console.log("gpuvis done ", outfile);
-        res.type('application/octet-stream');
-        try {
-          res.sendFile(outfile);
-        } catch (e) {
-          console.error("Can't sendfile ", outfile, e);
-          res.status(500).send(uuid + " Internal Server Error");
-        }
-        // res.send(200, 'gpuvis done! ');
+        console.log("Rga done");
+        runGpuVis(outfile, uuid).then(
+          outfile => {
+            console.log("gpuvis done ", outfile);
+            res.type('application/octet-stream');
+            try {
+              res.sendFile(outfile);
+            } catch (e) {
+              console.error("Can't sendfile ", outfile, e);
+              res.status(500).send(uuid + " Internal Server Error");
+            }
+          },
+          error => {
+            console.error("runGpuVis error", error);
+            res.status(500).send(uuid + " Internal Server Error");
+          });
       },
       error => {
         console.error("runGpuVis error", error);
         res.status(500).send(uuid + " Internal Server Error");
-      });
-  }else if(filetype === "OCL_SOURCE"){
-    res.status(200).send(uuid + " Can't do that yet");
+      }
+    )
   }
 }
+
+
+function runRGA(fn, uuid) {
+  return new Promise(function (resolve, reject) {
+    let intfilename = '\"' + options.intDir + uuid + '.txt' + '\"';
+    let inputfilename = '\"' + fn + '\"';
+    console.log("Starting Rga");
+    try {
+      const ls = spawn(options.rga, ["-s cl -c Fiji --isa " + intfilename, " " + inputfilename], {
+        windowsVerbatimArguments: true,
+        shell: true
+      });
+      ls.on('error', function (e) {
+        console.error("Can't spawn Rga", e);
+        reject(e);
+      });
+      ls.stderr.on('data', (data) => {
+        console.log(`stderr: ${data}`);
+      });
+      ls.on('close', (code) => {
+        resolve(options.intDir + uuid + '.txt');
+      });
+            //  let stdout = "";
+            ls.stdout.on('data', (data) => {
+              //stdout += `${data}`;
+              console.log(`stdout: ${data}`);
+            });
+    } catch (e) {
+      console.error("Can't spawn Rga", e);
+      reject(e);
+    }
+  });
+}
+
 
 function runGpuVis(fn, uuid) {
   return new Promise(function (resolve, reject) {
@@ -177,3 +220,4 @@ function runGpuVis(fn, uuid) {
     }
   });
 }
+
