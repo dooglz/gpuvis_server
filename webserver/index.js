@@ -15,6 +15,7 @@ if(useHTTPS === true){
   };
 }
 let gpuvis = '../../../BUILD/gpuvis_server/bin/Release/gpuvis_cli.exe';
+let rga = '/rga/rga'
 const child_process = require('child_process');
 const spawn = child_process.spawn;
 
@@ -23,6 +24,11 @@ let app = express();
 if (process.argv.length >= 2) {
     gpuvis = process.argv[2];
 }
+
+if (process.argv.length >= 3) {
+ rga = process.argv[3];
+}
+
 
 if (!fs.existsSync(filesavedir)) {
   fs.mkdirSync(filesavedir);
@@ -58,7 +64,7 @@ app.post('/upload', function(req, res) {
     }
     console.log(uuids, 'File saved', outputfilename);
     //res.send(200, 'File uploaded! ' + uuids);
-    processUpload(outputfilename, uuid, inputfile, res);
+    processUpload(outputfilename, uuid, inputfile, req, res);
   });
 });
 
@@ -85,16 +91,18 @@ if(useHTTPS){
 }
 
 
-function processUpload(fileondisk, uuid, fileinMemory, res) {
+function processUpload(fileondisk, uuid, fileinMemory, req, res) {
 
   let filetype = "NA";
   if (fileinMemory.startsWith("ShaderType = IL_SHADER_COMPUTE")) {
     filetype = "RGA_ASM_COMPUTE";
+  }else if(req.filetype && req.filetype == "ocl"){
+    filetype = "OCL_SOURCE"
   }
 
   console.log(uuids, 'processUpload, filetype:', filetype);
 
-  if (filetype != "RGA_ASM_COMPUTE") {
+  if (filetype === "NA") {
     res.status(400).send(uuid + " Can't read filetype:", filetype);
     return;
   }
