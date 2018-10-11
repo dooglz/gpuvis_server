@@ -8,7 +8,7 @@ sudo docker run -d --name gpuvis_server \
 		--hostname=gpuvis_server \
 		--mount source=gpuvis_server_src,target=/src \
 		-v /ssl:/ssl \
-		-v ~/rga-2.0.1.69:/rga
+		-v ~/rga-2.0.1.69:/rga \
 		--restart=always \
 		-p 80:80 -p 443:443\
 		gpuvis_server || exit 1;
