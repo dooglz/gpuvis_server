@@ -5,18 +5,64 @@
   <title>AJAX Upload Example</title>
   <script src="msgpack.min.js"></script>
   <script src="jquery-3.3.1.min.js"></script>
+</head>
+
+<body>
+  <h1>Manual file Upload</h1>
+  <form method="post" id="filename" name="filename" onsubmit="return uploadFile();">
+    <label>Select a file:</label><br>
+    <input type="file" id="file" name="inputfile" required />
+    <select id="filetypedropdown" name="filetype" required>
+      <option value="RGA_ASM_COMPUTE">GCN Compute Assembly</option>
+      <option value="OCL_SOURCE">OpenCL Kernel code</option>
+      <option value="NA">idk lol</option>
+    </select>
+
+    <input type="submit" value="Upload" />
+  </form>
+  <br>
+  <hr><br>
+  <div id="output"></div>
+  <br>
+  <hr><br>
+  <div id="errors"></div>
+
   <script type="text/javascript">
+    var result_data;
+    var decoded_data;
+    $("#filetypedropdown").prop("selectedIndex", -1);
+
+
+    function log(code, text, fromserver = false) {
+      $("#errors").append((fromserver ? "<b>" : "") + "<br>" + new Date().toLocaleTimeString() + ", [" + code + "] " + text + (fromserver ? "</b>" : ""));
+    }
+
+    function UploadDone(data) {
+      log("", "Upload Done, got Responce");
+      result_data = data;
+      var reader = new FileReader();
+      reader.addEventListener("loadend", function () {
+        decoded_data = msgpack.decode(new Uint8Array(reader.result));
+        log("", "Decoded Result");
+        $("#output").html(decoded_data.rET.length + " Register Events!<br>" + JSON.stringify(decoded_data).substr(0, 1024));
+      });
+      try{
+        reader.readAsArrayBuffer(result_data);
+      }catch(e){
+        log("", "Can't Decode Results :(");
+      }
+    }
+
     function updateProgress(evt) {
       if (evt.lengthComputable) {
         $("#output").text("Uploaded " + evt.loaded + " of " + evt.total + " bytes");
       }
     }
-    var result_data;
-    var decoded_data;
-    function uploadFile() {
 
+    function uploadFile() {
+      log("", "uploading " + $("#file")[0].value);
       var file_data = new FormData(document.getElementById('filename'));
-      $.ajax({
+      var aj = $.ajax({
         url: "http://localhost/upload",
         type: "POST",
         data: file_data,
@@ -29,34 +75,18 @@
         xhr: function () {
           myXhr = $.ajaxSettings.xhr();
           if (myXhr.upload) {
-            myXhr.upload.addEventListener('progress', updateProgress, false); // for handling the progress of the upload
+            myXhr.upload.addEventListener('progress', updateProgress, false);
           }
           return myXhr;
         },
-      }).done(function (data) {
-        result_data = data;
-        var reader = new FileReader();
-        reader.addEventListener("loadend", function () {
-          decoded_data = msgpack.decode(new Uint8Array(reader.result));
-          $("#output").html("Decoded Result! " + decoded_data.rET.length + " Register Events!<br>" + JSON.stringify(decoded_data).substr(0,1024));
-        });
-        reader.readAsArrayBuffer(result_data);
-        $("#output").html("Recieved Result: " + result_data.size );
-      });
+        error: (request, status, errorThrown) => log(request.status, errorThrown, true),
+      })
+      aj.done(UploadDone);
       return false;
     }
-  </script>
-</head>
 
-<body>
-  <h1>Manual file Upload</h1>
-  <form method="post" id="filename" name="filename" onsubmit="return uploadFile();">
-    <label>Select a file:</label><br>
-    <input type="file" id="file" name="inputfile" required />
-    <input type="submit" value="Upload" />
-  </form>
-  <br><hr><br>
-  <div id="output"></div>
+
+  </script>
 </body>
 
 </html>
