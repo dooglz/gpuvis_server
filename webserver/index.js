@@ -10,7 +10,7 @@ const intDir = process.cwd() + '/output/';
 const useHTTPS = true;
 let gpuvis = '../../../BUILD/gpuvis_server/bin/Release/gpuvis_cli.exe';
 
-var options = {
+var https_options = {
     key: fs.readFileSync('/ssl/private.key'),
     cert: fs.readFileSync('/ssl/soc-web-liv-32_napier_ac_uk.crt'),
 };
@@ -69,7 +69,7 @@ app.post('/run', function(req, res) {
 })
 
 if(useHTTPS){
-  let server = https.createServer(opts, app);
+  let server = https.createServer(https_options, app);
   server.on('error',(e)=>console.error("https server error, ",e));
   server.listen(port, ()=>console.log("SSL, Listening on port "+server.address().port));
 }else{
