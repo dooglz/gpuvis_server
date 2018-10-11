@@ -4,9 +4,16 @@ const app = express();
 const uuidv4 = require('uuid/v4');
 const port = 80;
 const fs = require('fs');
+const https = require('https');
 const filesavedir = process.cwd() + '/incomming/';
 const intDir = process.cwd() + '/output/';
+const useHTTPS = true;
 let gpuvis = '../../../BUILD/gpuvis_server/bin/Release/gpuvis_cli.exe';
+
+var options = {
+    key: fs.readFileSync('ssl/private.key'),
+    cert: fs.readFileSync('ssl/soc-web-liv-32_napier_ac_uk.crt'),
+};
 
 if (process.argv.length >= 2) {
     gpuvis = process.argv[2];
@@ -60,8 +67,12 @@ app.post('/run', function(req, res) {
   res.send('Got a post request at /run');
   console.log(req, res);
 })
-app.listen(port, () => console.log(`Example app listening on port ${port}!`));
 
+if(useHTTPS){
+	https.createServer(opts, app).listen(port, ()=>console.log("SSL, Listening on port "+listener.address().port));
+}else{
+	app.listen(port, () => console.log(`Example app listening on port ${port}!`));
+}
 
 
 function processUpload(fileondisk, uuid, fileinMemory, res) {
