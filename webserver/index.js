@@ -1,26 +1,28 @@
 const express = require('express');
 const fileUpload = require('express-fileupload');
-const app = express();
 const uuidv4 = require('uuid/v4');
-const port = 80;
+const port = 443;
 const fs = require('fs');
 const https = require('https');
 const filesavedir = process.cwd() + '/incomming/';
 const intDir = process.cwd() + '/output/';
 const useHTTPS = true;
-let gpuvis = '../../../BUILD/gpuvis_server/bin/Release/gpuvis_cli.exe';
-
-var https_options = {
+if(useHTTPS === true){
+ var http = require('http');
+ var https_options = {
     key: fs.readFileSync('/ssl/private.key'),
     cert: fs.readFileSync('/ssl/soc-web-liv-32_napier_ac_uk.crt'),
-};
+  };
+}
+let gpuvis = '../../../BUILD/gpuvis_server/bin/Release/gpuvis_cli.exe';
+const child_process = require('child_process');
+const spawn = child_process.spawn;
+
+let app = express();
 
 if (process.argv.length >= 2) {
     gpuvis = process.argv[2];
 }
-
-const child_process = require('child_process');
-const spawn = child_process.spawn;
 
 if (!fs.existsSync(filesavedir)) {
   fs.mkdirSync(filesavedir);
@@ -28,8 +30,8 @@ if (!fs.existsSync(filesavedir)) {
 if (!fs.existsSync(intDir)) {
   fs.mkdirSync(intDir);
 }
-app.use(fileUpload());
 
+app.use(fileUpload());
 
 app.use(function(req, res, next) {
   res.setHeader('Access-Control-Allow-Headers', 'accept, authorization, content-type, x-requested-with');
@@ -72,6 +74,12 @@ if(useHTTPS){
   let server = https.createServer(https_options, app);
   server.on('error',(e)=>console.error("https server error, ",e));
   server.listen(port, ()=>console.log("SSL, Listening on port "+server.address().port));
+  let insecureserver = http.createServer((req, res)=>{
+    res.writeHead(301, { "Location": "https://" + req.headers['host'] + req.url });
+    res.end();
+  });
+  insecureserver.on('error',(e)=>console.error("http server error, ",e));
+  insecureserver.listen(80);
 }else{
   app.listen(port, () => console.log(`Example app listening on port ${port}!`));
 }
