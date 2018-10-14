@@ -3,7 +3,7 @@
 #include <utility>
 #include <vector>
 
-enum opcode_type { VECTOR, SCALER, MEMORY, FLAT };
+enum opcode_type { VECTOR, SCALER, MEMORY, FLAT, GLOBAL };
 
 static const std::string opcode_type_string[] = {"VECTOR", "SCALER", "MEMORY", "FLAT"};
 
@@ -37,7 +37,7 @@ struct actual_operation {
   const operation *op;
   const std::vector<operand> oa;
 };
-
+#define TODO 
 #define REGS(...) std::vector<uint8_t>({__VA_ARGS__})
 #define OP(opcode, type, branch, ticks, help, r, w)                                                                    \
   { #opcode, opcode, type, branch, ticks, #help, r, w }
