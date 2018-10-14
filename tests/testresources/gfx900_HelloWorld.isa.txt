@@ -1,0 +1,18 @@
+AMD Kernel Code for "hello"
+
+Disassembly for "hello":
+
+@kernel hello:
+	s_load_dwordx2 s[0:1], s[4:5], 0x0                         // 000000001100: C0060002 00000000 
+	v_mov_b32_e32 v4, 33                                       // 000000001108: 7E0802A1 
+	v_mov_b32_e32 v5, 0x646c726f                               // 00000000110C: 7E0A02FF 646C726F 
+	v_mov_b32_e32 v0, 0x6c6c6548                               // 000000001114: 7E0002FF 6C6C6548 
+	v_mov_b32_e32 v1, 0x57202c6f                               // 00000000111C: 7E0202FF 57202C6F 
+	s_waitcnt lgkmcnt(0)                                       // 000000001124: BF8CC07F 
+	v_mov_b32_e32 v3, s1                                       // 000000001128: 7E060201 
+	v_mov_b32_e32 v2, s0                                       // 00000000112C: 7E040200 
+	global_store_dwordx2 v[2:3], v[0:1], off                   // 000000001130: DC748000 007F0002 
+	global_store_dword v[2:3], v5, off offset:8                // 000000001138: DC708008 007F0502 
+	global_store_short v[2:3], v4, off offset:12               // 000000001140: DC68800C 007F0402 
+	s_endpgm                                                   // 000000001148: BF810000 
+

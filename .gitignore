@@ -442,3 +442,5 @@ typings/
 webserver/incomming/
 webserver/output/
 webserver/.vscode/launch.json
+webserver/
+.vscode/

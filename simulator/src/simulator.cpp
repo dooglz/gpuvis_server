@@ -14,13 +14,13 @@ const int init() {
   return key;
 }
 
-bool run(const parser::Program &pgrm, const int GPUID) {
+bool run(const parser::Program& pgrm, const int GPUID) {
   auto a = gpu_db.find(GPUID);
   if (a == gpu_db.end()) {
     throw("INVALID GPU ID");
     return false;
   }
-  GPU &gpu = *a->second;
+  GPU& gpu = *a->second;
   auto op = pgrm.ops.begin();
   while (gpu.state == GPU::READY && op != pgrm.ops.end()) {
     gpu.tick(*op);
@@ -33,7 +33,7 @@ bool run(const parser::Program &pgrm, const int GPUID) {
   return true;
 }
 
-void pgrmstats(const parser::Program &pgrm) {
+void pgrmstats(const parser::Program& pgrm) {
   std::cout << "---\nProgram Stats\n";
   std::map<opcode_type, size_t> opcount;
   size_t vregr = 0, vregw = 0, sregr = 0, sregw = 0;
@@ -58,7 +58,7 @@ void pgrmstats(const parser::Program &pgrm) {
   std::cout << "---" << std::endl;
 }
 
-RegisterEventTicks GetRegisterEventTicks(GPU &gpu) {
+RegisterEventTicks GetRegisterEventTicks(GPU& gpu) {
   std::map<size_t, std::vector<RegisterEvent>> events;
   const auto regs = gpu.GetAllRegisters();
   const auto lasttick = gpu.tickcount;
@@ -76,12 +76,16 @@ RegisterEventTicks GetRegisterEventTicks(GPU &gpu) {
   return events;
 }
 
-SimulationSummary summary(const parser::Program &pgrm, const int GPUID) {
+void GetRegisterActivity(GPU& gpu) {
+
+}
+
+SimulationSummary summary(const parser::Program& pgrm, const int GPUID) {
   auto a = gpu_db.find(GPUID);
   if (a == gpu_db.end()) {
     throw("INVALID GPU ID");
   }
-  GPU &gpu = *a->second;
+  GPU& gpu = *a->second;
   return {GetRegisterEventTicks(gpu)};
 }
 

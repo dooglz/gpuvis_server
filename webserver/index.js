@@ -14,7 +14,8 @@ const optionDefinitions = [
   { name: 'key', type: String },
   { name: 'cert', type: String },
   { name: 'filesavedir', type: String, defaultValue: process.cwd() + '/incomming/' },
-  { name: 'intDir', type: String, defaultValue: process.cwd() + '/output/' },
+  { name: 'gpuvisintDir', type: String, defaultValue: process.cwd() + '/gpuvis/' },
+  { name: 'rgaintDir', type: String, defaultValue: process.cwd() + '/rga/' },
 ]
 const options = commandLineArgs(optionDefinitions);
 
@@ -44,10 +45,12 @@ let app = express();
 if (!fs.existsSync(options.filesavedir)) {
   fs.mkdirSync(options.filesavedir);
 }
-if (!fs.existsSync(options.intDir)) {
-  fs.mkdirSync(options.intDir);
+if (!fs.existsSync(options.gpuvisintDir)) {
+  fs.mkdirSync(options.gpuvisintDir);
 }
-
+if (!fs.existsSync(options.rgaintDir)) {
+  fs.mkdirSync(options.rgaintDir);
+}
 app.use(fileUpload());
 
 app.use(function (req, res, next) {
@@ -123,7 +126,7 @@ function processUpload(fileondisk, uuid, fileinMemory, req, res) {
   if (filetype === "RGA_ASM_COMPUTE") {
     runGpuVis(fileondisk, uuid).then(
       outfile => {
-        console.log("gpuvis done ", outfile);
+        console.log(uuid, "gpuvis done ", outfile);
         res.type('application/octet-stream');
         try {
           res.sendFile(outfile);
@@ -137,28 +140,28 @@ function processUpload(fileondisk, uuid, fileinMemory, req, res) {
         res.status(500).send(uuid + " Internal Server Error");
       });
   } else if (filetype === "OCL_SOURCE") {
-    res.status(200).send(uuid + " Can't do that yet");
+    //res.status(200).send(uuid + " Can't do that yet");
     runRGA(fileondisk, uuid).then(
       outfile => {
-        console.log("Rga done");
+        console.log(uuid, "Rga done", outfile);
         runGpuVis(outfile, uuid).then(
           outfile => {
-            console.log("gpuvis done ", outfile);
+            console.log(uuid, "gpuvis done ", outfile);
             res.type('application/octet-stream');
             try {
               res.sendFile(outfile);
             } catch (e) {
-              console.error("Can't sendfile ", outfile, e);
+              console.error(uuid, "Can't sendfile ", outfile, e);
               res.status(500).send(uuid + " Internal Server Error");
             }
           },
           error => {
-            console.error("runGpuVis error", error);
+            console.error(uuid, "runGpuVis error", error);
             res.status(500).send(uuid + " Internal Server Error");
           });
       },
       error => {
-        console.error("runGpuVis error", error);
+        console.error(uuid, "runGpuVis error", error);
         res.status(500).send(uuid + " Internal Server Error");
       }
     )
@@ -168,31 +171,51 @@ function processUpload(fileondisk, uuid, fileinMemory, req, res) {
 
 function runRGA(fn, uuid) {
   return new Promise(function (resolve, reject) {
-    let intfilename = '\"' + options.intDir + uuid + '.txt' + '\"';
-    let inputfilename = '\"' + fn + '\"';
-    console.log("Starting Rga");
+    let intfilename = '\"' + options.rgaintDir + uuid + '.txt' + '\"';
+
+    console.log(uuid, " Starting Rga");
+    fs.copyFile(fn, fn + '.cl', (err) => {
+      if (err) throw err;
+      console.log(uuid, (inputfilename + '.cl'), "Written");
+    });
+    let inputfilename = '\"' + fn + '.cl\"';
+
     try {
-      const ls = spawn(options.rga, ["-s cl -c Fiji --isa " + intfilename, " " + inputfilename], {
+      const ls = spawn(options.rga, ["-s rocm-cl -c gfx900 --isa " + intfilename, " " + inputfilename], {
         windowsVerbatimArguments: true,
         shell: true
       });
       ls.on('error', function (e) {
-        console.error("Can't spawn Rga", e);
+        console.error(uuid, "Can't spawn Rga", e);
         reject(e);
       });
       ls.stderr.on('data', (data) => {
-        console.log(`stderr: ${data}`);
+        let str = "" + data; 
+        str.split(/\r?\n/).forEach((d) => console.log(uuid, "rga stderr:", d));
       });
       ls.on('close', (code) => {
-        resolve(options.intDir + uuid + '.txt');
+        //find output files.
+        let fileIndir = fs.readdirSync(options.rgaintDir);
+        let files = [];
+        for (let i = 0; i < fileIndir.length; i++) {
+          if (fileIndir[i].includes(uuid)) {
+            files.push(fileIndir[i]);
+          }
+        };
+        if (files.length > 0) {
+          console.log(uuid, "rga files", files);
+          resolve(options.rgaintDir + files[0]);
+        } else {
+          console.error(uuid, "Can't see any RGA isa files!");
+          reject("nofiles");
+        }
       });
-      //  let stdout = "";
       ls.stdout.on('data', (data) => {
-        //stdout += `${data}`;
-        console.log(`stdout: ${data}`);
+        let str = "" + data;
+        str.split(/\r?\n/).forEach((d) => console.log(uuid, "rga stdout:",  encodeURI(d)));
       });
     } catch (e) {
-      console.error("Can't spawn Rga", e);
+      console.error(uuid, "Can't spawn Rga", e);
       reject(e);
     }
   });
@@ -201,9 +224,9 @@ function runRGA(fn, uuid) {
 
 function runGpuVis(fn, uuid) {
   return new Promise(function (resolve, reject) {
-    let intfilename = '\"' + options.intDir + uuid + '.bin' + '\"';
+    let intfilename = '\"' + options.gpuvisintDir + uuid + '.bin' + '\"';
     let inputfilename = '\"' + fn + '\"';
-    console.log("Starting gpuvis");
+    console.log(uuid, "Starting gpuvis");
     try {
       const ls = spawn(options.gpuvis, ["-f " + inputfilename, "-o " + intfilename, "-m"], {
         windowsVerbatimArguments: true,
@@ -211,25 +234,20 @@ function runGpuVis(fn, uuid) {
       });
 
       ls.on('error', function (e) {
-        console.error("Can't spawn gpuvis", e);
+        let str = "" + data;
+        str.split(/\r?\n/).forEach((d) => console.log(uuid, "gpuvis stderr:", d));
         reject(e);
       });
-
-      //  let stdout = "";
-      ls.stdout.on('data', (data) => {
-        //stdout += `${data}`;
-        //console.log(`stdout: ${data}`);
-      });
-
       ls.stderr.on('data', (data) => {
-        console.log(`stderr: ${data}`);
+        let str = "" + data;
+        str.split(/\r?\n/).forEach((d) => console.log(uuid, "gpuvis stderr:", d));
       });
       ls.on('close', (code) => {
-        resolve(options.intDir + uuid + '.bin');
+        resolve(options.gpuvisintDir + uuid + '.bin');
       });
 
     } catch (e) {
-      console.error("Can't spawn gpuvis", e);
+      console.error(uuid, "Can't spawn gpuvis", e);
       reject(e);
     }
   });

@@ -12,6 +12,7 @@ const void Register::read(const operand &addr) {
     reads[_gpu.tickcount].push_back(128);
   }
 }
+
 const void Register::write(const operand &addr) {
   if (addr.isRegister) {
     for (auto r : addr.regs) {
