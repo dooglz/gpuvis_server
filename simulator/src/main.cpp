@@ -17,7 +17,13 @@ auto findpgrm(int id) {
   return a;
 }
 
-const int gpuvis::loadProgram(const std::string &pgrm) {
+const int gpuvis::loadSource(int pgrmid, const std::string& src) {
+  auto a = findpgrm(pgrmid);
+  (a->second)->source = src;
+  return 0;
+}
+
+const int gpuvis::loadProgram(const std::string& pgrm) {
   auto a = parser::parse(pgrm);
   if (a != nullptr) {
     simulator::pgrmstats(*a);

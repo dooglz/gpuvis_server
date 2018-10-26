@@ -86,7 +86,7 @@ SimulationSummary summary(const parser::Program& pgrm, const int GPUID) {
     throw("INVALID GPU ID");
   }
   GPU& gpu = *a->second;
-  return {GetRegisterEventTicks(gpu)};
+  return {GetRegisterEventTicks(gpu), pgrm.ops, pgrm.source};
 }
 
 } // namespace simulator

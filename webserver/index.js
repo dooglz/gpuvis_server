@@ -13,6 +13,7 @@ const optionDefinitions = [
   { name: 'https', type: Boolean, defaultValue: false },
   { name: 'key', type: String },
   { name: 'cert', type: String },
+  { name: 'webdir', type: String, defaultValue: __dirname + '/static/' },
   { name: 'filesavedir', type: String, defaultValue: process.cwd() + '/incomming/' },
   { name: 'gpuvisintDir', type: String, defaultValue: process.cwd() + '/gpuvis/' },
   { name: 'rgaintDir', type: String, defaultValue: process.cwd() + '/rga/' },
@@ -85,7 +86,7 @@ app.post('/upload', function (req, res) {
 
 //app.use(express.static('static'));
 
-app.use('/', express.static(__dirname + '/static'));
+app.use('/', express.static(options.webdir));
 app.post('/run', function (req, res) {
   res.send('Got a post request at /run');
   console.log(req, res);
@@ -110,13 +111,13 @@ function processUpload(fileondisk, uuid, fileinMemory, req, res) {
   let filetype = "NA";
   const filetypeHint = req.body ? req.body.filetype : "NA";
   const headder = fileinMemory.data.toString();
-  if (filetypeHint == "RGA_ASM_COMPUTE" && headder.startsWith("ShaderType = IL_SHADER_COMPUTE")) {
+  if (filetypeHint == "RGA_ASM_COMPUTE" && (headder.startsWith("ShaderType = IL_SHADER_COMPUTE") || headder.startsWith("AMD Kernel Code for"))) {
     filetype = "RGA_ASM_COMPUTE";
   } else if (filetypeHint == "OCL_SOURCE" && headder.includes("__kernel")) {
     filetype = "OCL_SOURCE"
   }
 
-  console.log(uuid, 'processUpload, filetype:', filetype, filetypeHint);
+  console.log(uuid, 'processUpload, filetype:', filetype, " hint: ", filetypeHint);
 
   if (filetype === "NA") {
     res.status(400).send(uuid + " Can't read filetype:" + filetype);
@@ -144,7 +145,7 @@ function processUpload(fileondisk, uuid, fileinMemory, req, res) {
     runRGA(fileondisk, uuid).then(
       outfile => {
         console.log(uuid, "Rga done", outfile);
-        runGpuVis(outfile, uuid).then(
+        runGpuVis(outfile, uuid, fileondisk).then(
           outfile => {
             console.log(uuid, "gpuvis done ", outfile);
             res.type('application/octet-stream');
@@ -190,7 +191,7 @@ function runRGA(fn, uuid) {
         reject(e);
       });
       ls.stderr.on('data', (data) => {
-        let str = "" + data; 
+        let str = "" + data;
         str.split(/\r?\n/).forEach((d) => console.log(uuid, "rga stderr:", d));
       });
       ls.on('close', (code) => {
@@ -212,7 +213,7 @@ function runRGA(fn, uuid) {
       });
       ls.stdout.on('data', (data) => {
         let str = "" + data;
-        str.split(/\r?\n/).forEach((d) => console.log(uuid, "rga stdout:",  encodeURI(d)));
+        str.split(/\r?\n/).forEach((d) => console.log(uuid, "rga stdout:", encodeURI(d)));
       });
     } catch (e) {
       console.error(uuid, "Can't spawn Rga", e);
@@ -222,13 +223,13 @@ function runRGA(fn, uuid) {
 }
 
 
-function runGpuVis(fn, uuid) {
+function runGpuVis(fn, uuid, source = "") {
   return new Promise(function (resolve, reject) {
     let intfilename = '\"' + options.gpuvisintDir + uuid + '.bin' + '\"';
     let inputfilename = '\"' + fn + '\"';
     console.log(uuid, "Starting gpuvis");
     try {
-      const ls = spawn(options.gpuvis, ["-f " + inputfilename, "-o " + intfilename, "-m"], {
+      const ls = spawn(options.gpuvis, ["-f " + inputfilename, "-o " + intfilename, "-m", (source != "" ? "-s " + source : "")], {
         windowsVerbatimArguments: true,
         shell: true
       });

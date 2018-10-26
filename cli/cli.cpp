@@ -51,17 +51,33 @@ std::string base64_encode(unsigned char const* bytes_to_encode, unsigned int in_
   return ret;
 }
 
-void inputFile(const std::string& ip) {
+void inputFile(const std::string& ip, const std::string& source = "") {
 
   std::ifstream t(ip);
   std::string str((std::istreambuf_iterator<char>(t)), std::istreambuf_iterator<char>());
+  t.close();
   if (str == "") {
-    throw std::runtime_error("Can't open file! " + ip);
+    throw std::runtime_error("Can't open input Asm! " + ip);
   }
 
   auto pgrm = gpuvis::loadProgram(str);
   if (pgrm == 0) {
     throw std::runtime_error("Problem loading Program");
+  }
+
+  if (source != "") {
+    std::ifstream srct(source);
+    std::string srcstr((std::istreambuf_iterator<char>(srct)),
+                       std::istreambuf_iterator<char>());
+    srct.close();
+    if (srcstr == "") {
+      throw std::runtime_error("Can't open source file! " + source);
+    } else {
+      auto ret = gpuvis::loadSource(pgrm, srcstr);
+      if (ret != 0) {
+        throw std::runtime_error("Problem loadSource");
+      }
+    }
   }
 
   auto gpu = gpuvis::initGPU();
@@ -129,8 +145,10 @@ int main(int argc, char** argv) {
 
   CLI::App app("GPUVIS Server CLI");
   std::string file;
-  app.add_option("-f,--file,file", file, "input source code")->required();
+  std::string source = "";
+  app.add_option("-f,--file,file", file, "input asm file")->required();
   app.add_option("-o,--output", outputfile, "output file, default stdout");
+  app.add_option("-s,--source", source, "input source file [needs correct asm]");
   app.add_flag("-m,--messagepack,", mp, "Output in Encoded Messagepack, default JSON");
   app.add_flag("-b,--b64,", b64, "Base64 Encode Output");
 
@@ -141,44 +159,10 @@ int main(int argc, char** argv) {
   outputfile = "output/mp_b64.txt";
   */
   try {
-    inputFile(file);
+    inputFile(file, source);
   } catch (const std::exception& e) {
     std::cerr << "ERROR: " << e.what() << std::endl;
     return 1;
   }
-  return 0;
-  mp = true;
-  b64 = false;
-  outputfile = "output/mp.bin";
-
-  try {
-    inputFile(file);
-  } catch (const std::exception& e) {
-    std::cerr << "ERROR: " << e.what() << std::endl;
-    return 1;
-  }
-
-  mp = false;
-  b64 = false;
-  outputfile = "output/js.txt";
-
-  try {
-    inputFile(file);
-  } catch (const std::exception& e) {
-    std::cerr << "ERROR: " << e.what() << std::endl;
-    return 1;
-  }
-
-  mp = false;
-  b64 = true;
-  outputfile = "output/js_b64.txt";
-
-  try {
-    inputFile(file);
-  } catch (const std::exception& e) {
-    std::cerr << "ERROR: " << e.what() << std::endl;
-    return 1;
-  }
-
   return 0;
 }
