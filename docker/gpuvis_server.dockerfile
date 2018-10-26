@@ -6,6 +6,9 @@ RUN apt-get update
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
     nodejs npm clang-6.0 wget git tar make ca-certificates
 
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+    libxml2
+
 RUN CMAKE_URL="https://cmake.org/files/v3.12/cmake-3.12.1-Linux-x86_64.tar.gz" && \
     echo "pulling down cmake" ${CMAKE_URL}  && \
     mkdir cmake && wget -q  --no-check-certificate ${CMAKE_URL}
