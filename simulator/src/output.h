@@ -1,8 +1,7 @@
 #pragma once
 #include "isa/isa.h"
-#include "json.hpp"
 #include "simulator.h"
-#include "isa/isa.h"
+#include "json.hpp"
 #include <string>
 using json = nlohmann::json;
 

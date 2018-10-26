@@ -1,4 +1,5 @@
 #include "gpu.h"
+#include "../isa/isa.h"
 #include "../isa/fiji.h"
 #include "../parser.h"
 #include <iostream>

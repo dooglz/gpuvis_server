@@ -1,9 +1,9 @@
+#include <string>
 #include "isa/isa.h"
+#include "simulator.h"
 #include "gpuvis.h"
 #include "output.h"
 #include "parser.h"
-#include "simulator.h"
-#include <string>
 
 const std::string gpuvis::hello() { return "Hello Simulator World"; }
 
