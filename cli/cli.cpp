@@ -56,7 +56,7 @@ void inputFile(const std::string& ip, const std::string& source = "") {
   std::ifstream t(ip);
   std::string str((std::istreambuf_iterator<char>(t)), std::istreambuf_iterator<char>());
   t.close();
-  if (str == "") {
+  if (str.empty()) {
     throw std::runtime_error("Can't open input Asm! " + ip);
   }
 
@@ -65,12 +65,12 @@ void inputFile(const std::string& ip, const std::string& source = "") {
     throw std::runtime_error("Problem loading Program");
   }
 
-  if (source != "") {
+  if (!source.empty()) {
     std::ifstream srct(source);
     std::string srcstr((std::istreambuf_iterator<char>(srct)),
                        std::istreambuf_iterator<char>());
     srct.close();
-    if (srcstr == "") {
+    if (srcstr.empty()) {
       throw std::runtime_error("Can't open source file! " + source);
     } else {
       auto ret = gpuvis::loadSource(pgrm, srcstr);
@@ -92,14 +92,14 @@ void inputFile(const std::string& ip, const std::string& source = "") {
 
   if (!mp) {
     auto json = gpuvis::summaryJSON(pgrm, gpu);
-    if (json == "") {
+    if (json.empty()) {
       throw std::runtime_error("Problem json");
     }
     if (b64) {
       json = base64_encode(reinterpret_cast<const unsigned char*>(json.c_str()),
                            json.length());
     }
-    if (outputfile != "") {
+    if (!outputfile.empty()) {
       std::ofstream fout(outputfile, std::ios::out | std::ios::binary);
       fout.write((char*)&json[0], json.size() * sizeof(char));
       fout.close();
@@ -113,7 +113,7 @@ void inputFile(const std::string& ip, const std::string& source = "") {
     if (msgpk.empty()) {
       throw std::runtime_error("Problem msgpk");
     }
-    if (outputfile != "") {
+    if (!outputfile.empty()) {
       std::ofstream fout(outputfile, std::ios::out | std::ios::binary);
       if (b64) {
         std::string b64s = base64_encode(

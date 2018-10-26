@@ -100,7 +100,7 @@ GPU::GPU(size_t CUs, size_t SimdUs, size_t SLanes) {
 }
 
 ComputeUnit::ComputeUnit(size_t SimdUs, size_t SLanes, const GPU &gpu, size_t id, GPU_Component *const parent)
-    : GPU_Component(gpu, id, parent, "CU"), LDS(gpu, this), SU(gpu, this) {
+    : GPU_Component(gpu, id, parent, "CU"), SU(gpu, this), LDS(gpu, this) {
   for (size_t i = 1; i <= SimdUs; ++i) {
     simdUnits.emplace_back(SLanes, gpu, i, this);
   }
@@ -119,7 +119,7 @@ SimdLane::SimdLane(const GPU &gpu, size_t id, GPU_Component *const parent)
 GPU::~GPU() = default;
 
 GPU_Component::GPU_Component(const GPU &gpu, size_t id, GPU_Component *parent, std::string type)
-    : _gpu(gpu), _localId(id), _parent(parent), _globalId(getGlobalID(parent, id, 0)), _type(std::move(type)) {
+    : _gpu(gpu), _localId(id), _globalId(getGlobalID(parent, id, 0)), _parent(parent), _type(std::move(type)) {
   // std::cout << "gpu: New thing: " << _type << _globalId << " " << idToStr(_globalId) << std::endl;
 }
 
