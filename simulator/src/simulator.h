@@ -1,5 +1,6 @@
 #pragma once
 #include "parser.h"
+#include "isa/isa.h"
 
 namespace simulator {
 const int init();

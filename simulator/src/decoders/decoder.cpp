@@ -1,4 +1,5 @@
 #include "decoder.h"
+#include "../isa/isa.h"
 #include "../isa/fiji.h"
 #include "../parser.h"
 #include <algorithm>

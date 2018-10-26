@@ -52,7 +52,6 @@ std::string base64_encode(unsigned char const* bytes_to_encode, unsigned int in_
 }
 
 void inputFile(const std::string& ip, const std::string& source = "") {
-
   std::ifstream t(ip);
   std::string str((std::istreambuf_iterator<char>(t)), std::istreambuf_iterator<char>());
   t.close();

@@ -38,7 +38,8 @@ struct actual_operation {
   const std::vector<operand> oa;
   ~actual_operation() = default;
 };
-#define TODO 
+
+#define TODO
 #define REGS(...) std::vector<uint8_t>({__VA_ARGS__})
 #define OP(opcode, type, branch, ticks, help, r, w)                                                                    \
   { #opcode, opcode, type, branch, ticks, #help, r, w }
