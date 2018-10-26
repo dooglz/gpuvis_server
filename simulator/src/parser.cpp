@@ -1,4 +1,5 @@
 #include "parser.h"
+#include "isa/isa.h"
 #include "decoders/decoder.h"
 #include <algorithm>
 #include <iostream>

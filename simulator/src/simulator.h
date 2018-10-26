@@ -13,7 +13,7 @@ struct RegisterEvent {
   RegisterEvent() = default;
 };
 
-typedef std::map<size_t, std::vector<RegisterEvent>> RegisterEventTicks;
+using RegisterEventTicks = std::map<size_t, std::vector<RegisterEvent>>;
 
 struct SimulationSummary {
   const RegisterEventTicks registerEventTicks;

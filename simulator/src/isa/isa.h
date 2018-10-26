@@ -36,6 +36,7 @@ struct operand {
 struct actual_operation {
   const operation *op;
   const std::vector<operand> oa;
+  ~actual_operation() = default;
 };
 #define TODO 
 #define REGS(...) std::vector<uint8_t>({__VA_ARGS__})
