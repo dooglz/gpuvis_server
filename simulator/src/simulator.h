@@ -17,6 +17,8 @@ typedef std::map<size_t, std::vector<RegisterEvent>> RegisterEventTicks;
 
 struct SimulationSummary {
   const RegisterEventTicks registerEventTicks;
+  const std::vector<actual_operation> ops;
+  const std::string source;
 };
 
 SimulationSummary summary(const parser::Program &pgrm, int GPUID);

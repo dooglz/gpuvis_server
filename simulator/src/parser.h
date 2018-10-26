@@ -12,7 +12,8 @@ public:
   Program(const Program&) = delete;
   Program() = delete;
   ~Program();
-  const std::string raw;
+  const std::string raw; //raw input assembly
+  std::string source; //optional originating source code.
   const std::vector<actual_operation> ops;
 
 private:

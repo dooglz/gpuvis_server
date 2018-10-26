@@ -1,15 +1,30 @@
 #pragma once
 #include "json.hpp"
 #include "simulator.h"
+#include "isa/isa.h"
 #include <string>
 using json = nlohmann::json;
 
 namespace simulator {
-void to_json(json &j, const SimulationSummary &s) { j = json{{"rET", s.registerEventTicks}}; }
+void to_json(json &j, const SimulationSummary &s) { j = json{{"rET", s.registerEventTicks},{"ops",s.ops},{"source",s.source}}; }
+
 void to_json(json &j, const RegisterEvent &re) {
   j = json{{"id", re.who}, {"r", re.reads}, {"w", re.writes}};
 }
+
+
+
 } // namespace simulator
+
+
+void to_json(json& j, const operand& oa) {
+   j = oa.raw;
+  //to_json(j, oa.raw);
+}
+
+void to_json(json& j, const actual_operation& ao) {
+  j = json{{"op", ao.op->opcode_str} , {"oa", ao.oa}};
+}
 
 namespace output {
 
