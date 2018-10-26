@@ -1,3 +1,4 @@
+#include "isa/isa.h"
 #include "gpuvis.h"
 #include "output.h"
 #include "parser.h"

@@ -1,3 +1,4 @@
+#include "isa/isa.h"
 #include "simulator.h"
 #include "gpu/gpu.h"
 #include <iostream>

@@ -1,4 +1,5 @@
 #pragma once
+#include "isa/isa.h"
 #include "json.hpp"
 #include "simulator.h"
 #include "isa/isa.h"

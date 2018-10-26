@@ -16,6 +16,7 @@ struct operation {
   const std::string helptext;
   const std::vector<uint8_t> reads;
   const std::vector<uint8_t> writes;
+  ~operation() = default;
 };
 
 // typedef std::string operand;
@@ -31,6 +32,7 @@ struct operand {
   operand(std::string r, bool re = false, bool cn = false, bool ad = false, bool sc = false,
           const std::vector<uint8_t> rgs = {})
       : raw(std::move(r)), isRegister(re), isConstant(cn), isAddress(ad), isScaler(sc), regs(rgs) {}
+  ~operand() = default;
 };
 
 struct actual_operation {
