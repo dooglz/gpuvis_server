@@ -182,7 +182,7 @@ function runRGA(fn, uuid) {
     let inputfilename = '\"' + fn + '.cl\"';
 
     try {
-      const ls = spawn(options.rga, ["-s rocm-cl -c gfx900 --isa " + intfilename, " " + inputfilename], {
+      const ls = spawn(options.rga, ["-s rocm-cl -c gfx900 --line-numbers --isa " + intfilename, " " + inputfilename], {
         windowsVerbatimArguments: true,
         shell: true
       });

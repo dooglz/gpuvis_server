@@ -1,0 +1,72 @@
+AMD Kernel Code for "bitonic_sort_step"
+
+Disassembly for "bitonic_sort_step":
+
+@kernel bitonic_sort_step:
+; C:\Users\Sam\Desktop\sort.cl:4
+; i = get_global_id(0);
+	s_load_dword s2, s[4:5], 0x4                               // 000000002100: C0020082 00000004 
+	s_load_dword s3, s[6:7], 0x8                               // 000000002108: C00200C3 00000008 
+	s_load_dwordx2 s[0:1], s[6:7], 0x10                        // 000000002110: C0060003 00000010 
+	s_waitcnt lgkmcnt(0)                                       // 000000002118: BF8CC07F 
+	s_and_b32 s1, s2, 0xffff                                   // 00000000211C: 8601FF02 0000FFFF 
+	s_mul_i32 s8, s8, s1                                       // 000000002124: 92080108 
+	v_add_u32_e32 v0, s8, v0                                   // 000000002128: 68000008 
+	v_add_co_u32_e32 v1, vcc, s0, v0                           // 00000000212C: 32020000 
+; C:\Users\Sam\Desktop\sort.cl:5
+; ixj = i^j;
+	v_xor_b32_e32 v3, s3, v1                                   // 000000002130: 2A060203 
+; C:\Users\Sam\Desktop\sort.cl:8
+; if ((ixj)>i) {
+	v_cmp_gt_u32_e32 vcc, v3, v1                               // 000000002134: 7D980303 
+	s_and_saveexec_b64 s[0:1], vcc                             // 000000002138: BE80206A 
+	s_cbranch_execz BB0_8                                      // 00000000213C: BF88002E 
+	s_load_dwordx2 s[2:3], s[6:7], 0x0                         // 000000002140: C0060083 00000000 
+	s_load_dword s0, s[6:7], 0xc                               // 000000002148: C0020003 0000000C 
+	v_mov_b32_e32 v2, 0                                        // 000000002150: 7E040280 
+	v_lshlrev_b64 v[4:5], 2, v[1:2]                            // 000000002154: D28F0004 00020282 
+; C:\Users\Sam\Desktop\sort.cl:9
+; if ((i&k) == 0) {
+	s_waitcnt lgkmcnt(0)                                       // 00000000215C: BF8CC07F 
+	v_and_b32_e32 v0, s0, v1                                   // 000000002160: 26000200 
+	v_cmp_ne_u32_e32 vcc, 0, v0                                // 000000002164: 7D9A0080 
+	v_add_co_u32_e64 v0, s[0:1], s2, v4                        // 000000002168: D1190000 00020802 
+	v_mov_b32_e32 v1, s3                                       // 000000002170: 7E020203 
+	v_mov_b32_e32 v4, v2                                       // 000000002174: 7E080302 
+	v_lshlrev_b64 v[2:3], 2, v[3:4]                            // 000000002178: D28F0002 00020682 
+	v_addc_co_u32_e64 v1, s[0:1], v1, v5, s[0:1]               // 000000002180: D11C0001 00020B01 
+	v_mov_b32_e32 v4, s3                                       // 000000002188: 7E080203 
+	v_add_co_u32_e64 v2, s[0:1], s2, v2                        // 00000000218C: D1190002 00020402 
+	v_addc_co_u32_e64 v3, s[0:1], v4, v3, s[0:1]               // 000000002194: D11C0003 00020704 
+	global_load_dword v4, v[0:1], off                          // 00000000219C: DC508000 047F0000 
+	global_load_dword v5, v[2:3], off                          // 0000000021A4: DC508000 057F0002 
+	s_and_saveexec_b64 s[0:1], vcc                             // 0000000021AC: BE80206A 
+	s_xor_b64 s[0:1], exec, s[0:1]                             // 0000000021B0: 8880007E 
+; C:\Users\Sam\Desktop\sort.cl:20
+; if (dev_values[i]<dev_values[ixj]) {
+	s_waitcnt vmcnt(0)                                         // 0000000021B4: BF8C0F70 
+	v_cmp_lt_u32_e32 vcc, v4, v5                               // 0000000021B8: 7D920B04 
+	s_and_saveexec_b64 s[2:3], vcc                             // 0000000021BC: BE82206A 
+	global_store_dword v[0:1], v5, off                         // 0000000021C0: DC708000 007F0500 
+; C:\Users\Sam\Desktop\sort.cl:24
+; dev_values[ixj] = temp;
+	global_store_dword v[2:3], v4, off                         // 0000000021C8: DC708000 007F0402 
+	s_or_b64 exec, exec, s[2:3]                                // 0000000021D0: 87FE027E 
+	s_or_saveexec_b64 s[0:1], s[0:1]                           // 0000000021D4: BE802100 
+	s_xor_b64 exec, exec, s[0:1]                               // 0000000021D8: 88FE007E 
+; C:\Users\Sam\Desktop\sort.cl:11
+; if (dev_values[i]>dev_values[ixj]) {
+	s_waitcnt vmcnt(0)                                         // 0000000021DC: BF8C0F70 
+	v_cmp_gt_u32_e32 vcc, v4, v5                               // 0000000021E0: 7D980B04 
+	s_and_saveexec_b64 s[0:1], vcc                             // 0000000021E4: BE80206A 
+; C:\Users\Sam\Desktop\sort.cl:14
+; dev_values[i] = dev_values[ixj];
+	global_store_dword v[0:1], v5, off                         // 0000000021E8: DC708000 007F0500 
+; C:\Users\Sam\Desktop\sort.cl:15
+; dev_values[ixj] = temp;
+	global_store_dword v[2:3], v4, off                         // 0000000021F0: DC708000 007F0402 
+BB0_8:
+; C:\Users\Sam\Desktop\sort.cl:28
+; }
+	s_endpgm                                                   // 0000000021F8: BF810000 
+

@@ -1,6 +1,6 @@
 #include "decoder.h"
-#include "../isa/isa.h"
 #include "../isa/fiji.h"
+#include "../isa/isa.h"
 #include "../parser.h"
 #include <algorithm>
 #include <iostream>
@@ -12,11 +12,11 @@ opcode_type a;
 using namespace parser;
 
 #define beginsWith(a, b) (a.find(b, 0) == 0)
-#define FAIL(a)                                                                                                        \
-  std::cerr << "Invalid program file:\n" << #a << std::endl;                                                           \
+#define FAIL(a)                                                                          \
+  std::cerr << "Invalid program file:\n" << #a << std::endl;                             \
   return nullptr;
 
-template <typename T> std::vector<T> split(const T &str, const T &delimiters) {
+template <typename T> std::vector<T> split(const T& str, const T& delimiters) {
   std::vector<T> v;
   typename T::size_type start = 0;
   auto pos = str.find_first_of(delimiters, start);
@@ -34,12 +34,13 @@ template <typename T> std::vector<T> split(const T &str, const T &delimiters) {
 }
 
 namespace decoder {
-const operand parseOperand(const std::string& input) {
+operand parseOperand(const std::string& input) {
   std::string raw = input;
-  bool isRegister = (input[0] == 's' || ((input[0] == 'v') && (input[1] != 'm') && (input[1]!='c')));
+  bool isRegister =
+      (input[0] == 's' || ((input[0] == 'v') && (input[1] != 'm') && (input[1] != 'c')));
   bool isConstant = !isRegister;
   bool isAddress = false; // todo
-  bool isLabel = false; //todo
+  bool isLabel = false;   // todo
   bool isScaler = isRegister && (input[0] == 's');
   std::vector<uint8_t> regs;
   if (isRegister) {
@@ -72,15 +73,14 @@ bool validateOperation(const actual_operation& op) {
   return true;
 }
 
-
 class rga_disasm_compute : public decoderT {
   const std::string name() override { return "rga_disasm_compute"; }
-  bool compatible(const std::string &input) override;
-  std::unique_ptr<parser::Program> parse(const std::string &input) override;
-  const actual_operation parseASM(const std::string &input);
+  bool compatible(const std::string& input) override;
+  std::unique_ptr<parser::Program> parse(const std::string& input) override;
+  const actual_operation parseASM(const std::string& input);
 };
 
-bool rga_disasm_compute::compatible(const std::string &input) {
+bool rga_disasm_compute::compatible(const std::string& input) {
   return beginsWith(input, "ShaderType = IL_SHADER_COMPUTE");
 }
 
@@ -88,14 +88,17 @@ class rga_2_disasm_compute : public decoderT {
   const std::string name() override { return "rga_2_disasm"; }
   bool compatible(const std::string& input) override;
   std::unique_ptr<parser::Program> parse(const std::string& input) override;
-  const actual_operation parseASM(const std::string& input);
+  const bool parseASM(const std::string& input, const operation*& op_out,
+                      std::vector<operand>& oa_out);
+  std::vector<std::tuple<uint8_t, uint8_t>> lineCorralation() override;
+  std::vector<std::tuple<uint8_t, uint8_t>> _lineCorralations;
+  void handleLineNum(const std::string& line);
+  uint8_t _currentasmNum;
 };
 
 bool rga_2_disasm_compute::compatible(const std::string& input) {
   return beginsWith(input, "AMD Kernel Code for");
 }
-
-
 
 std::unique_ptr<parser::Program> rga_2_disasm_compute::parse(const std::string& input) {
   std::vector<std::string> lines;
@@ -123,24 +126,82 @@ std::unique_ptr<parser::Program> rga_2_disasm_compute::parse(const std::string& 
     FAIL("No ASM!");
   }
 
-  auto fe =
-      std::find_if(fs, lines.end(), [](std::string x) { return beginsWith(x, "	s_endpgm"); });
+  auto fe = std::find_if(fs, lines.end(),
+                         [](std::string x) { return beginsWith(x, "	s_endpgm"); });
   if (fe == lines.end()) {
     FAIL("Too Much ASM!");
   }
+  _currentasmNum = 0;
   fe++;
   std::vector<actual_operation> ops;
 
   while (++fs != fe) {
-    ops.push_back(parseASM(*fs));
+    const operation* opi;
+    std::vector<operand> operands;
+    if (parseASM(*fs, opi, operands)) {
+      _currentasmNum++;
+      ops.push_back(actual_operation{opi, operands});
+    }
   }
-
-  return std::make_unique<Program>(input, ops);
-
+  auto pgrm = std::make_unique<Program>(input, ops);
+  pgrm->lineCorralation = lineCorralation();
+  return std::move(pgrm);
 }
 
-const actual_operation rga_2_disasm_compute::parseASM(const std::string& input) {
+void rga_2_disasm_compute::handleLineNum(const std::string& line) {
+  std::cerr << "asm: LineNum: " << line << std::endl;
+  const auto tokens = split<std::string>(line, ":");
+  if (!tokens.empty() && tokens.size() > 1) {
+    int src_ln = -1;
+    try {
+      src_ln = std::stoi(tokens[tokens.size()-1]);
+    } catch (...) {
+      return;
+    }
+    _lineCorralations.emplace_back(src_ln, _currentasmNum);
+  }
+}
+
+const bool rga_2_disasm_compute::parseASM(const std::string& input,
+                                          const operation*& op_out,
+                                          std::vector<operand>& oa_out) {
   const auto tokens = split<std::string>(input, " ,\t");
+
+  if (!tokens.empty()) {
+    const std::string opcode = tokens[0];
+    if (opcode == ";") {
+      handleLineNum(input);
+      return false;
+    }
+    for (auto& opi : ISA) {
+      if (opi.opcode_str == opcode) {
+        std::vector<operand> operands;
+        for (size_t i = 1; i < tokens.size(); i++) {
+          if (tokens[i] == "//") {
+            break;
+          }
+          operands.emplace_back(parseOperand(tokens[i]));
+        }
+        actual_operation ret = {&opi, operands};
+        validateOperation(ret);
+        op_out = &opi;
+        oa_out = std::move(operands);
+        return true;
+      }
+    }
+  }
+  std::cerr << "asm: UNKOWN: " << input << std::endl;
+  op_out = &ISA[0];
+  oa_out.emplace_back("nop");
+  return true;
+}
+
+std::vector<std::tuple<uint8_t, uint8_t>> rga_2_disasm_compute::lineCorralation() {
+  return _lineCorralations;
+}
+
+const actual_operation rga_disasm_compute::parseASM(const std::string& input) {
+  const auto tokens = split<std::string>(input, " ,");
   if (!tokens.empty()) {
     const std::string opcode = tokens[0];
     for (auto& opi : ISA) {
@@ -163,36 +224,7 @@ const actual_operation rga_2_disasm_compute::parseASM(const std::string& input) 
   return nop;
 }
 
-
-
-
-
-
-const actual_operation rga_disasm_compute::parseASM(const std::string &input) {
-  const auto tokens = split<std::string>(input, " ,");
-  if (!tokens.empty()) {
-    const std::string opcode = tokens[0];
-    for (auto &opi : ISA) {
-      if (opi.opcode_str == opcode) {
-        std::vector<operand> operands;
-        for (size_t i = 1; i < tokens.size(); i++) {
-          if (tokens[i] == "//") {
-            break;
-          }
-          operands.emplace_back(parseOperand(tokens[i]));
-        }
-        actual_operation ret = {&opi, operands};
-        validateOperation(ret);
-        return ret;
-      }
-    }
-  }
-  std::cerr << "asm: UNKOWN: " << input << std::endl;
-  const actual_operation nop = {&ISA[0], {operand("nop")}};
-  return nop;
-}
-
-std::unique_ptr<Program> rga_disasm_compute::parse(const std::string &input) {
+std::unique_ptr<Program> rga_disasm_compute::parse(const std::string& input) {
   std::cout << "rga_disasm_compute parsing" << std::endl;
   std::vector<std::string> lines;
 
@@ -212,13 +244,15 @@ std::unique_ptr<Program> rga_disasm_compute::parse(const std::string &input) {
     }
   }
 
-  auto fs = std::find_if(lines.begin(), lines.end(), [](std::string x) { return beginsWith(x, "shader main"); });
+  auto fs = std::find_if(lines.begin(), lines.end(),
+                         [](std::string x) { return beginsWith(x, "shader main"); });
 
   if (fs == lines.end()) {
     FAIL("No ASM!");
   }
 
-  auto fe = std::find_if(fs, lines.end(), [](std::string x) { return beginsWith(x, "end"); });
+  auto fe =
+      std::find_if(fs, lines.end(), [](std::string x) { return beginsWith(x, "end"); });
   if (fe == lines.end()) {
     FAIL("Too Much ASM!");
   }
@@ -231,17 +265,20 @@ std::unique_ptr<Program> rga_disasm_compute::parse(const std::string &input) {
   return std::make_unique<Program>(input, ops);
 }
 
-
-
-std::unique_ptr<decoder::decoderT> find(const std::string &input) {
+std::unique_ptr<decoder::decoderT> find(const std::string& input) {
   std::unique_ptr<decoder::decoderT> b[] = {
       std::make_unique<decoder::rga_disasm_compute>(),
       std::make_unique<decoder::rga_2_disasm_compute>()};
-  for (auto &d : b) {
+  for (auto& d : b) {
     if (d->compatible(input)) {
       return std::move(d);
     }
   }
   return nullptr;
 }
+
+std::vector<std::tuple<uint8_t, uint8_t>> decoderT::lineCorralation() {
+  return std::vector<std::tuple<uint8_t, uint8_t>>();
+}
+
 } // namespace decoder

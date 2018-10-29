@@ -6,7 +6,12 @@
 using json = nlohmann::json;
 
 namespace simulator {
-void to_json(json &j, const SimulationSummary &s) { j = json{{"rET", s.registerEventTicks},{"ops",s.ops},{"source",s.source}}; }
+void to_json(json& j, const SimulationSummary& s) {
+  j = json{{"rET", s.registerEventTicks},
+           {"ops", s.ops},
+           {"source", s.source},
+           {"lines", s.lineCorralation}};
+}
 
 void to_json(json &j, const RegisterEvent &re) {
   j = json{{"id", re.who}, {"r", re.reads}, {"w", re.writes}};

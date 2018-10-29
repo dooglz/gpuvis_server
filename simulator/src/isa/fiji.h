@@ -20,6 +20,7 @@ enum ISAe {
   s_load_dwordx2,
   v_mov_b32_e32,
   global_store_dwordx2,
+  global_store_dwordx4,
   global_store_dword,
   global_store_short,
   s_load_dword,
@@ -30,7 +31,22 @@ enum ISAe {
   v_xor_b32_e32,
   v_cmp_gt_u32_e32,
   s_and_saveexec_b64,
-  s_cbranch_execz
+  s_cbranch_execz,
+  v_or_b32_e32,
+  s_xor_b64,
+  v_and_b32_e32,
+  v_not_b32_e32,
+  v_cndmask_b32_e64,
+  v_cmp_lt_i32_e64,
+  v_lshrrev_b64,
+  s_or_saveexec_b64,
+  v_cmp_ne_u64_e32,
+  v_cndmask_b32_e32,
+  s_lshl_b64,
+  v_cmp_lt_i32_e32,
+  s_add_i32,
+  v_addc_co_u32_e32
+
 };
 
 const operation ISA[] = {
@@ -52,13 +68,30 @@ const operation ISA[] = {
     OP(global_store_dwordx2, GLOBAL, false, 1, , REGS(1), REGS(0)),
     OP(global_store_dword, GLOBAL, false, 1, , REGS(1), REGS(0)),
     OP(global_store_short, GLOBAL, false, 1, , REGS(1), REGS(0)),
+    OP(global_store_dwordx4, GLOBAL, false, 1, , REGS(), REGS()), // todo
     //
-    OP(s_and_b32, SCALER, false, 1, , REGS(1,2), REGS(0)),
-    OP(s_mul_i32, SCALER, false, 1, , REGS(1,2), REGS(0)),
-    OP(v_add_u32_e32, VECTOR, false, 1, , REGS(1,2), REGS(0)),
-    OP(v_add_co_u32_e32, VECTOR, false, 1, , REGS(1,2), REGS(0)),
-    OP(v_xor_b32_e32, VECTOR, false, 1, , REGS(1,2), REGS(0)),
-    OP(v_cmp_gt_u32_e32, VECTOR, false, 1, , REGS(1,2), REGS(0)),
+    OP(s_and_b32, SCALER, false, 1, , REGS(1, 2), REGS(0)),
+    OP(s_mul_i32, SCALER, false, 1, , REGS(1, 2), REGS(0)),
+    OP(v_add_u32_e32, VECTOR, false, 1, , REGS(1, 2), REGS(0)),
+    OP(v_add_co_u32_e32, VECTOR, false, 1, , REGS(1, 2), REGS(0)),
+    OP(v_xor_b32_e32, VECTOR, false, 1, , REGS(1, 2), REGS(0)),
+    OP(v_cmp_gt_u32_e32, VECTOR, false, 1, , REGS(1, 2), REGS(0)),
     OP(s_and_saveexec_b64, SCALER, false, 1, , REGS(1), REGS(0)), // todo check
-    OP(s_cbranch_execz, SCALER, true, 1, , REGS(0), REGS(TODO)),     // todo check
+    OP(s_cbranch_execz, SCALER, true, 1, , REGS(0), REGS(TODO)),  // todo check
+    OP(s_xor_b64, SCALER, false, 1, , REGS(), REGS()),            // todo
+    OP(v_or_b32_e32, VECTOR, false, 1, , REGS(), REGS()),         // todo
+    OP(v_and_b32_e32, VECTOR, false, 1, , REGS(), REGS()),        // todo
+    OP(v_not_b32_e32, VECTOR, false, 1, , REGS(), REGS()),        // todo
+    OP(v_cndmask_b32_e64, VECTOR, false, 1, , REGS(), REGS()),    // todo
+    OP(v_cmp_lt_i32_e64, VECTOR, false, 1, , REGS(), REGS()),     // todo
+    OP(v_lshrrev_b64, VECTOR, false, 1, , REGS(), REGS()),        // todo
+
+    OP(s_or_saveexec_b64, VECTOR, false, 1, , REGS(), REGS()), // todo
+    OP(v_cmp_ne_u64_e32, VECTOR, false, 1, , REGS(), REGS()),  // todo
+    OP(v_cndmask_b32_e32, VECTOR, false, 1, , REGS(), REGS()), // todo
+    OP(s_lshl_b64, VECTOR, false, 1, , REGS(), REGS()),        // todo
+    OP(v_cmp_lt_i32_e32, VECTOR, false, 1, , REGS(), REGS()),  // todo
+    OP(s_add_i32, SCALER, false, 1, , REGS(), REGS()),         // todo
+    OP(v_addc_co_u32_e32, VECTOR, false, 1, , REGS(), REGS()),  // todo
+
 };
