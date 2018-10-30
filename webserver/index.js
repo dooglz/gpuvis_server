@@ -20,6 +20,15 @@ const optionDefinitions = [
 ]
 const options = commandLineArgs(optionDefinitions);
 
+if (!fs.existsSync(options.rga)) {
+  console.error("Bad rga path", options.rga);
+  process.exit(1);
+}
+if (!fs.existsSync(options.gpuvis)) {
+  console.error("Bad gpuvis path", options.gpuvis);
+  process.exit(1);
+}
+
 if (options.https === true) {
   if (options.port == 80) { options.port = 443; }
   var http = require('http');
