@@ -36,14 +36,14 @@ bool run(const parser::Program& pgrm, const int GPUID) {
 
 void pgrmstats(const parser::Program& pgrm) {
   std::cout << "---\nProgram Stats\n";
-  std::map<opcode_type, size_t> opcount;
+  std::map<OPCODE_TYPE, size_t> opcount;
   size_t vregr = 0, vregw = 0, sregr = 0, sregw = 0;
   for (const auto op : pgrm.ops) {
     opcount[op.op->type]++;
-    if (op.op->type == VECTOR) {
+    if (isVector(op.op->type)) {
       vregr += op.op->reads.size();
       vregw += op.op->writes.size();
-    } else if (op.op->type == SCALER) {
+    } else if (isScaler(op.op->type)) {
       sregr += op.op->reads.size();
       sregw += op.op->writes.size();
     }

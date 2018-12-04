@@ -7,9 +7,10 @@
 #include <memory>
 #include <vector>
 
-opcode_type a;
+OPCODE_TYPE a;
 
 using namespace parser;
+using namespace isa;
 
 #define beginsWith(a, b) (a.find(b, 0) == 0)
 #define FAIL(a)                                                                          \

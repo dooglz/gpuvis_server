@@ -3,7 +3,7 @@
 #include "../isa/fiji.h"
 #include "../parser.h"
 #include <iostream>
-
+using namespace isa;
 const void Register::read(const operand &addr) {
   if (addr.isRegister) {
     for (auto r : addr.regs) {
@@ -26,14 +26,9 @@ const void Register::write(const operand &addr) {
 
 bool ComputeUnit::tick(const actual_operation op) {
   bool ret = true;
-  if (op.op->type == SCALER) {
+  if (isScaler(op.op->type)) {
     ret &= SU.tick(op);
-  } else if (op.op->type == VECTOR) {
-    for (auto &su : simdUnits) {
-      ret &= su.tick(op);
-    }
-    return ret;
-  } else if (op.op->type == FLAT) {
+  } else if (isVector(op.op->type)) {
     for (auto &su : simdUnits) {
       ret &= su.tick(op);
     }
