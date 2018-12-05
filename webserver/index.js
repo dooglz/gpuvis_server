@@ -80,7 +80,6 @@ const gpuvis = new GPUVIS(options.gpuvis, options.gpuvisintDir);
 gpuvis.version().then(v => console.log(v));
 
 app.post('/upload', function (req, res) {
-  console.info("/upload");
   const uuid = uuidv4();
   const uuids = uuid.substr(0, 4);
   if (!req.files || !req.files.inputfile) {
@@ -88,8 +87,6 @@ app.post('/upload', function (req, res) {
     return res.status(400).send('No files were uploaded.');
   }
   let inputfile = req.files.inputfile;
-  console.log(uuids, "file uploaded", inputfile.name);
-
   let outputfilename = options.filesavedir + uuid + '.txt';
   inputfile.mv(outputfilename, function (err) {
     if (err) {
@@ -126,15 +123,27 @@ function processUpload(fileondisk, uuid, fileinMemory, req, res) {
   let filetype = "NA";
   const filetypeHint = req.body ? req.body.filetype : "NA";
   const headder = fileinMemory.data.toString();
+
   if (filetypeHint == "RGA_ASM_COMPUTE" && (headder.startsWith("ShaderType = IL_SHADER_COMPUTE") || headder.startsWith("AMD Kernel Code for"))) {
     filetype = "RGA_ASM_COMPUTE";
   } else if (filetypeHint == "OCL_SOURCE" && headder.includes("__kernel")) {
     filetype = "OCL_SOURCE"
+  } else if (filetypeHint == "GLSL_VERT_SOURCE") {
+    filetype = "GLSL_VERT_SOURCE";
+  } else if (filetypeHint == "GLSL_FRAG_SOURCE") {
+    filetype = "GLSL_FRAG_SOURCE";
+  } else if (filetypeHint == "GLSL_GEOM_SOURCE") {
+    filetype = "GLSL_GEOM_SOURCE";
+  } else if (filetypeHint == "GLSL_TESC_SOURCE") {
+    filetype = "GLSL_TESC_SOURCE";
+  } else if (filetypeHint == "GLSL_TESE_SOURCE") {
+    filetype = "GLSL_TESE_SOURCE";
   }
-
+  const shadertypes = ["GLSL_VERT_SOURCE", "GLSL_FRAG_SOURCE", "GLSL_GEOM_SOURCE", "GLSL_TESC_SOURCE", "GLSL_TESE_SOURCE"];
   console.log(uuid, 'processUpload, filetype:', filetype, " hint: ", filetypeHint);
 
   if (filetype === "NA") {
+    console.warn("Can't determine file type")
     res.status(400).send(uuid + " Can't read filetype:" + filetype);
     return;
   }
@@ -151,6 +160,17 @@ function processUpload(fileondisk, uuid, fileinMemory, req, res) {
     //res.status(200).send(uuid + " Can't do that yet");
     let intfilename = '\"' + options.rgaintDir + uuid + '.txt' + '\"';
     rga.doCL(fileondisk, intfilename)
+      .then(() => findFilesLike_p(options.rgaintDir, uuid), PassReject)
+      .then((files) => gpuvis.run(files[0], fileondisk), PassReject)
+      .then((outfile) => fileExists_p(outfile), PassReject)
+      .then((outfile) => sendDatatoSite_p(res, outfile), PassReject)
+      .catch((rejectionError) => {
+        console.error(uuid, "chain error ", rejectionError);
+        res.status(500).send(uuid + " Internal Server Error");
+      });
+  } else if (shadertypes.includes(filetype)) {
+    let intfilename = '\"' + options.rgaintDir + uuid + '.txt' + '\"';
+    rga.doShader(filetype, fileondisk, intfilename)
       .then(() => findFilesLike_p(options.rgaintDir, uuid), PassReject)
       .then((files) => gpuvis.run(files[0], fileondisk), PassReject)
       .then((outfile) => fileExists_p(outfile), PassReject)
@@ -182,7 +202,6 @@ function fileExists_p(file) {
   return new Promise(function (resolve, reject) {
     fs.access(file, fs.constants.F_OK | fs.constants.R_OK, (err) => {
       if (!err) {
-        console.log(file, "Exists");
         resolve(file);
       } else {
         reject("Doesn't exist or Can't read " + file);

@@ -15,7 +15,7 @@ class RGA {
     async doCL(inputfilename, outputfilename) {
         if (!inputfilename.endsWith(".cl")) {
             fs.copyFile(inputfilename, inputfilename + '.cl', (err) => {
-                if (err) {return Promise.reject("can't make temp .cl file");}
+                if (err) { return Promise.reject("can't make temp .cl file"); }
             });
             inputfilename = '\"' + inputfilename + '.cl\"';
         }
@@ -23,10 +23,27 @@ class RGA {
         //Todo: parse stdout to detect build failure.
         return this._call(cmdline);
     }
-    async doShader(inputfilename, outputfilename) {
+    async doFragShader(inputfilename, outputfilename) {
         let option = ["-s rocm-cl -c gfx900 --line-numbers --isa ", outputfilename, inputfilename];
         return this._call(cmdline);
     }
+    async doShader(type, inputfilename, outputfilename) {
+        let inputstring = "";
+        if (type == "GLSL_VERT_SOURCE") {
+            inputstring = "--vert";
+        } else if (type == "GLSL_FRAG_SOURCE") {
+            inputstring = "--frag";
+        } else if (type == "GLSL_GEOM_SOURCE") {
+            inputstring = "--geom";
+        } else if (type == "GLSL_TESC_SOURCE") {
+            inputstring = "--tesc";
+        } else if (type == "GLSL_TESE_SOURCE") {
+            inputstring = "--tese";
+        }
+        let cmdline = ["-s vulkan -c gfx900 --isa ", outputfilename, inputstring+' '+inputfilename];
+        return this._call(cmdline);
+    }
+
 
     _call(cmdline, verboseflag) {
         let p_e = () => { };

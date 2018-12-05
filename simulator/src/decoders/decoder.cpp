@@ -98,7 +98,11 @@ class rga_2_disasm_compute : public decoderT {
 };
 
 bool rga_2_disasm_compute::compatible(const std::string& input) {
-  return beginsWith(input, "AMD Kernel Code for");
+  bool looksgood = false;
+  looksgood |= beginsWith(input, "AMD Kernel Code for");
+  looksgood |= (beginsWith(input, "; -------- Disassembly ") && input.substr(44, 11) == "shader main");
+
+  return looksgood;
 }
 
 std::unique_ptr<parser::Program> rga_2_disasm_compute::parse(const std::string& input) {
@@ -124,11 +128,17 @@ std::unique_ptr<parser::Program> rga_2_disasm_compute::parse(const std::string& 
                          [](std::string x) { return beginsWith(x, "@kernel "); });
 
   if (fs == lines.end()) {
+    fs = std::find_if(lines.begin(), lines.end(),
+                           [](std::string x) { return beginsWith(x, "  type("); });
+  }
+
+  if (fs == lines.end()) {
     FAIL("No ASM!");
   }
 
-  auto fe = std::find_if(fs, lines.end(),
-                         [](std::string x) { return beginsWith(x, "	s_endpgm"); });
+  auto fe = std::find_if(fs, lines.end(), [](std::string x) {
+    return (x.find("s_endpgm") != std::string::npos);
+  });
   if (fe == lines.end()) {
     FAIL("Too Much ASM!");
   }

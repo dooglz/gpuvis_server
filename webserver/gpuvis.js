@@ -21,7 +21,7 @@ class GPUVIS {
         return this._call(cmdline).then(() => outfile);
     }
 
-    _call(cmdline, verboseflag) {
+    _call(cmdline, rejectonStdError = false, verboseflag = false) {
         let p_e = () => { };
         let p_l = p_e;
         if (verboseflag) {
@@ -31,6 +31,8 @@ class GPUVIS {
         if (typeof (cmdline) === "string") { cmdline = [cmdline]; }
         const binary = this.gpuvisBinaryLocation;
         return new Promise(function (resolve, reject) {
+            let anystderror = false;
+            let errorstrings = "";
             try {
                 let output = "";
                 const ls = spawn(binary, cmdline, {
@@ -43,10 +45,15 @@ class GPUVIS {
                 });
                 ls.stderr.on('data', (data) => {
                     let str = "" + data;
-                    str.split(/\r?\n/).forEach((d) => p_l("Gpuvis stderr:", d));
+                    str.split(/\r?\n/).forEach((d) =>{ errorstrings+=(d+". "); p_l("Gpuvis stderr:", d)});
+                    anystderror = true;
                 });
                 ls.on('close', (code) => {
-                    resolve(output);
+                    if (rejectonStdError && anystderror) {
+                        reject("GPUVIS gave errors: "+ errorstrings);
+                    } else {
+                        resolve(output);
+                    }
                 });
                 ls.stdout.on('data', (data) => {
                     let str = "" + data;
