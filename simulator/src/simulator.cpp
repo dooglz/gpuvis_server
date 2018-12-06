@@ -35,7 +35,7 @@ bool run(const parser::Program& pgrm, const int GPUID) {
 }
 
 void pgrmstats(const parser::Program& pgrm) {
-  std::cout << "---\nProgram Stats\n";
+  std::cout << "---\nProgram Stats " << pgrm.name<<"\n";
   std::map<OPCODE_TYPE, size_t> opcount;
   size_t vregr = 0, vregw = 0, sregr = 0, sregw = 0;
   for (const auto op : pgrm.ops) {
@@ -81,13 +81,13 @@ void GetRegisterActivity(GPU& gpu) {
 
 }
 
-SimulationSummary summary(const parser::Program& pgrm, const int GPUID) {
+ProgramSummary summary(const parser::Program& pgrm, const int GPUID) {
   auto a = gpu_db.find(GPUID);
   if (a == gpu_db.end()) {
     throw("INVALID GPU ID");
   }
   GPU& gpu = *a->second;
-  return {GetRegisterEventTicks(gpu), pgrm.ops, pgrm.source, pgrm.lineCorralation};
+  return {pgrm.name,GetRegisterEventTicks(gpu), pgrm.ops, pgrm.lineCorralation};
 }
 
 } // namespace simulator

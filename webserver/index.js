@@ -123,6 +123,8 @@ function processUpload(fileondisk, uuid, fileinMemory, req, res) {
   let filetype = "NA";
   const filetypeHint = req.body ? req.body.filetype : "NA";
   const headder = fileinMemory.data.toString();
+  const rgaOutPath = '\"' + options.rgaintDir + uuid + '.txt' + '\"';
+  const gpuvisOutPath = options.gpuvisintDir + uuid + "_gpuvis.bin";
 
   if (filetypeHint == "RGA_ASM_COMPUTE" && (headder.startsWith("ShaderType = IL_SHADER_COMPUTE") || headder.startsWith("AMD Kernel Code for"))) {
     filetype = "RGA_ASM_COMPUTE";
@@ -151,30 +153,29 @@ function processUpload(fileondisk, uuid, fileinMemory, req, res) {
   if (filetype === "RGA_ASM_COMPUTE") {
     gpuvis.run(fileondisk)
       .then((outfile) => fileExists_p(outfile), PassReject)
-      .then((outfile) => sendDatatoSite_p(res, outfile), PassReject)
+      .then((outfile) => sendDataToSite_p(res, outfile), PassReject)
       .catch((rejectionError) => {
         console.error(uuid, "chain error ", rejectionError);
         res.status(500).send(uuid + " Internal Server Error");
       });
   } else if (filetype === "OCL_SOURCE") {
-    //res.status(200).send(uuid + " Can't do that yet");
-    let intfilename = '\"' + options.rgaintDir + uuid + '.txt' + '\"';
-    rga.doCL(fileondisk, intfilename)
+    const oclSrc_fileondisk = fileondisk;
+    rga.doCL(oclSrc_fileondisk, rgaOutPath)
       .then(() => findFilesLike_p(options.rgaintDir, uuid), PassReject)
-      .then((files) => gpuvis.run(files[0], fileondisk), PassReject)
+      .then((files) => gpuvis.run(files, gpuvisOutPath, oclSrc_fileondisk), PassReject)
       .then((outfile) => fileExists_p(outfile), PassReject)
-      .then((outfile) => sendDatatoSite_p(res, outfile), PassReject)
+      .then((outfile) => sendDataToSite_p(res, outfile), PassReject)
       .catch((rejectionError) => {
         console.error(uuid, "chain error ", rejectionError);
         res.status(500).send(uuid + " Internal Server Error");
       });
   } else if (shadertypes.includes(filetype)) {
-    let intfilename = '\"' + options.rgaintDir + uuid + '.txt' + '\"';
-    rga.doShader(filetype, fileondisk, intfilename)
+    const shaderSrc_fileondisk = fileondisk;
+    rga.doShader(filetype, shaderSrc_fileondisk, rgaOutPath)
       .then(() => findFilesLike_p(options.rgaintDir, uuid), PassReject)
-      .then((files) => gpuvis.run(files[0], fileondisk), PassReject)
+      .then((files) => gpuvis.run(files, gpuvisOutPath, shaderSrc_fileondisk), PassReject)
       .then((outfile) => fileExists_p(outfile), PassReject)
-      .then((outfile) => sendDatatoSite_p(res, outfile), PassReject)
+      .then((outfile) => sendDataToSite_p(res, outfile), PassReject)
       .catch((rejectionError) => {
         console.error(uuid, "chain error ", rejectionError);
         res.status(500).send(uuid + " Internal Server Error");
@@ -183,7 +184,7 @@ function processUpload(fileondisk, uuid, fileinMemory, req, res) {
 }
 
 
-function sendDatatoSite_p(res, outfile) {
+function sendDataToSite_p(res, outfile, uuid = "") {
   return new Promise(function (resolve, reject) {
     try {
       res.type('application/octet-stream');

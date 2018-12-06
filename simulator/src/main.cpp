@@ -1,9 +1,9 @@
-#include <string>
-#include "isa/isa.h"
-#include "simulator.h"
 #include "gpuvis.h"
+#include "isa/isa.h"
 #include "output.h"
 #include "parser.h"
+#include "simulator.h"
+#include <string>
 
 const std::string gpuvis::hello() { return "Hello Simulator World"; }
 
@@ -24,8 +24,8 @@ const int gpuvis::loadSource(int pgrmid, const std::string& src) {
   return 0;
 }
 
-const int gpuvis::loadProgram(const std::string& pgrm) {
-  auto a = parser::parse(pgrm);
+const int gpuvis::loadProgram(const std::string& pgrm, const std::string& name) {
+  auto a = parser::parse(pgrm,name);
   if (a != nullptr) {
     simulator::pgrmstats(*a);
     pgrm_db[++key] = std::move(a);
@@ -42,15 +42,30 @@ const int gpuvis::runProgram(int pgrmid, int gpuid) {
 
 const simulator::SimulationSummary summary(int pgrmid, int gpuid) {
   auto a = findpgrm(pgrmid);
-  return simulator::summary(*(a->second), gpuid);
+  simulator::SimulationSummary summary{{simulator::summary(*(a->second), gpuid)},
+                                       (a->second)->source};
+  return summary;
 }
 
-std::string gpuvis::summaryJSON(int pgrmid, int gpuid) {
-
-  return output::gimmyjson(summary(pgrmid, gpuid));
+const simulator::SimulationSummary summary(const std::vector<int>& pgrmids, int gpuid) {
+  std::vector<simulator::ProgramSummary> ps;
+  std::string source;
+  for (auto pgm : pgrmids) {
+    auto a = findpgrm(pgm);
+    ps.push_back(simulator::summary(*(a->second), gpuid));
+    source = (a->second)->source;
+  }
+  simulator::SimulationSummary summary{ps, source};
+  return summary;
 }
 
-std::vector<std::uint8_t> gpuvis::summaryMSGPK(int pgrmid, int gpuid) {
-  return output::gimmyMsgPack(summary(pgrmid, gpuid));
+std::string gpuvis::summaryJSON(const std::vector<int>& pgrmids, int gpuid) {
+  return output::gimmyjson(summary(pgrmids, gpuid));
 }
+
+std::vector<std::uint8_t> gpuvis::summaryMSGPK(const std::vector<int>& pgrmids,
+                                               int gpuid) {
+  return output::gimmyMsgPack(summary(pgrmids, gpuid));
+}
+
 const int gpuvis::initGPU() { return simulator::init(); }

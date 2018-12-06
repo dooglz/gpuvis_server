@@ -17,13 +17,19 @@ struct RegisterEvent {
 
 using RegisterEventTicks = std::map<size_t, std::vector<RegisterEvent>>;
 
-struct SimulationSummary {
+struct ProgramSummary {
+  const std::string name;
   const RegisterEventTicks registerEventTicks;
   const std::vector<actual_operation> ops;
-  const std::string source;
   const std::vector<std::tuple<uint8_t, uint8_t>> lineCorralation;
 };
+struct SimulationSummary {
+  const std::vector<ProgramSummary> programs;
+  const std::string source;
+};
 
-SimulationSummary summary(const parser::Program& pgrm, int GPUID);
+
+
+ProgramSummary summary(const parser::Program& pgrm, int GPUID);
 
 } // namespace simulator

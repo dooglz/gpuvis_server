@@ -51,28 +51,48 @@ std::string base64_encode(unsigned char const* bytes_to_encode, unsigned int in_
   return ret;
 }
 
-void inputFile(const std::string& ip, const std::string& source = "") {
-  std::ifstream t(ip);
-  std::string str((std::istreambuf_iterator<char>(t)), std::istreambuf_iterator<char>());
-  t.close();
-  if (str.empty()) {
-    throw std::runtime_error("Can't open input Asm! " + ip);
+void inputFile(const std::vector<std::string>& ip, const std::string& source = "") {
+
+  struct inputprogram{
+    std::string filepath;
+    std::string name;
+    std::string contents;
+    int program;
+  };
+  //sperate helper list of all program ids.
+  std::vector<int> programs;
+
+  std::vector<inputprogram> inputprograms;
+  for (auto ipi : ip) {
+    std::ifstream t(ipi);
+    std::string str((std::istreambuf_iterator<char>(t)),
+                    std::istreambuf_iterator<char>());
+    t.close();
+    if (str.empty()) {
+      throw std::runtime_error("Can't open input Asm! " + ipi);
+    }
+    inputprograms.push_back({ipi, ipi.substr(ipi.find_last_of("/\\")+1,32),str,0});
   }
 
-  auto pgrm = gpuvis::loadProgram(str);
-  if (pgrm == 0) {
-    throw std::runtime_error("Problem loading Program");
-  }
-
+  std::string programSourceString;
   if (!source.empty()) {
     std::ifstream srct(source);
-    std::string srcstr((std::istreambuf_iterator<char>(srct)),
-                       std::istreambuf_iterator<char>());
+    programSourceString = std::string((std::istreambuf_iterator<char>(srct)),
+                                      std::istreambuf_iterator<char>());
     srct.close();
-    if (srcstr.empty()) {
+    if (programSourceString.empty()) {
       throw std::runtime_error("Can't open source file! " + source);
-    } else {
-      auto ret = gpuvis::loadSource(pgrm, srcstr);
+    }
+  }
+
+  for (auto& p : inputprograms) {
+    p.program = gpuvis::loadProgram(p.contents, p.name);
+    if (p.program == 0) {
+      throw std::runtime_error("Problem loading Program" + p.name);
+    }
+    programs.push_back(p.program);
+    if (!programSourceString.empty()) {
+      auto ret = gpuvis::loadSource(p.program, programSourceString);
       if (ret != 0) {
         throw std::runtime_error("Problem loadSource");
       }
@@ -84,13 +104,15 @@ void inputFile(const std::string& ip, const std::string& source = "") {
     throw std::runtime_error("Problem initGPU");
   }
 
-  auto res = gpuvis::runProgram(pgrm, gpu);
-  if (res == 0) {
-    throw std::runtime_error("Problem runProgram");
+  for (auto& p : inputprograms) {
+    auto res = gpuvis::runProgram(p.program, gpu);
+    if (res == 0) {
+      throw std::runtime_error("Problem runProgram");
+    }
   }
 
   if (!mp) {
-    auto json = gpuvis::summaryJSON(pgrm, gpu);
+    auto json = gpuvis::summaryJSON(programs, gpu);
     if (json.empty()) {
       throw std::runtime_error("Problem json");
     }
@@ -107,7 +129,7 @@ void inputFile(const std::string& ip, const std::string& source = "") {
     }
 
   } else {
-    auto msgpk = gpuvis::summaryMSGPK(pgrm, gpu);
+    auto msgpk = gpuvis::summaryMSGPK(programs, gpu);
 
     if (msgpk.empty()) {
       throw std::runtime_error("Problem msgpk");
@@ -143,9 +165,9 @@ void inputFile(const std::string& ip, const std::string& source = "") {
 int main(int argc, char** argv) {
 
   CLI::App app("GPUVIS Server CLI");
-  std::string file;
+  std::vector<std::string> files;
   std::string source = "";
-  app.add_option("-f,--file,file", file, "input asm file")->required();
+  app.add_option("-f,--files,file", files, "input asm file(s)")->required();
   app.add_option("-o,--output", outputfile, "output file, default stdout");
   app.add_option("-s,--source", source, "input source file [needs correct asm]");
   app.add_flag("-m,--messagepack,", mp, "Output in Encoded Messagepack, default JSON");
@@ -158,7 +180,7 @@ int main(int argc, char** argv) {
   outputfile = "output/mp_b64.txt";
   */
   try {
-    inputFile(file, source);
+    inputFile(files, source);
   } catch (const std::exception& e) {
     std::cerr << "ERROR: " << e.what() << std::endl;
     return 1;

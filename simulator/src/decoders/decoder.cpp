@@ -77,7 +77,7 @@ bool validateOperation(const actual_operation& op) {
 class rga_disasm_compute : public decoderT {
   const std::string name() override { return "rga_disasm_compute"; }
   bool compatible(const std::string& input) override;
-  std::unique_ptr<parser::Program> parse(const std::string& input) override;
+  std::unique_ptr<parser::Program> parse(const std::string& input,const std::string& name) override;
   const actual_operation parseASM(const std::string& input);
 };
 
@@ -88,7 +88,7 @@ bool rga_disasm_compute::compatible(const std::string& input) {
 class rga_2_disasm_compute : public decoderT {
   const std::string name() override { return "rga_2_disasm"; }
   bool compatible(const std::string& input) override;
-  std::unique_ptr<parser::Program> parse(const std::string& input) override;
+  std::unique_ptr<parser::Program> parse(const std::string& input,const std::string& name) override;
   const bool parseASM(const std::string& input, const operation*& op_out,
                       std::vector<operand>& oa_out);
   std::vector<std::tuple<uint8_t, uint8_t>> lineCorralation() override;
@@ -105,7 +105,8 @@ bool rga_2_disasm_compute::compatible(const std::string& input) {
   return looksgood;
 }
 
-std::unique_ptr<parser::Program> rga_2_disasm_compute::parse(const std::string& input) {
+std::unique_ptr<parser::Program> rga_2_disasm_compute::parse(const std::string& input,
+                                                             const std::string& name) {
   std::vector<std::string> lines;
 
   std::string currentline;
@@ -154,7 +155,7 @@ std::unique_ptr<parser::Program> rga_2_disasm_compute::parse(const std::string& 
       ops.push_back(actual_operation{opi, operands});
     }
   }
-  auto pgrm = std::make_unique<Program>(input, ops);
+  auto pgrm = std::make_unique<Program>(input, ops, name);
   pgrm->lineCorralation = lineCorralation();
   return std::move(pgrm);
 }
@@ -235,7 +236,8 @@ const actual_operation rga_disasm_compute::parseASM(const std::string& input) {
   return nop;
 }
 
-std::unique_ptr<Program> rga_disasm_compute::parse(const std::string& input) {
+std::unique_ptr<Program> rga_disasm_compute::parse(const std::string& input,
+                                                   const std::string& name) {
   std::cout << "rga_disasm_compute parsing" << std::endl;
   std::vector<std::string> lines;
 
@@ -273,7 +275,7 @@ std::unique_ptr<Program> rga_disasm_compute::parse(const std::string& input) {
     ops.push_back(parseASM(*fs));
   }
 
-  return std::make_unique<Program>(input, ops);
+  return std::make_unique<Program>(input, ops, name);
 }
 
 std::unique_ptr<decoder::decoderT> find(const std::string& input) {
