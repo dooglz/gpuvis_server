@@ -1,5 +1,5 @@
 
-Native C++ simple-simulator that parses GPU assembly and provides static analysis
+### Native C++ simple-simulator that parses AMDGPU assembly and provides static analysis.
 
 [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/2198/badge)](https://bestpractices.coreinfrastructure.org/projects/2198)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/83f648c94e4d41d09a57e279c611d380)](https://www.codacy.com/app/dooglz/gpuvis_server?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=dooglz/gpuvis_server&amp;utm_campaign=Badge_Grade)
@@ -11,4 +11,26 @@ Native C++ simple-simulator that parses GPU assembly and provides static analysi
 | [![Test status](http://teststatusbadge.azurewebsites.net/api/status/dooglz/gpuvis-server)](https://ci.appveyor.com/project/dooglz/gpuvis-server) | | | |
 
 
+# Building
 
+### Use Cmake. 
+#### Options:
+- GPUVIS_build_tests (default: no)
+  - build googletest, add tests to build.
+
+## Project Structure:
+
+- simulator/
+    - Main simulator code. Builds to a library.
+- cli /
+    - cli wrapper for the lib. Does a bit of validation and can base64 encode results.
+- tests /
+     - googletests
+- webserver /
+    - nodejs webserver to interface with the native executable.
+    - designed to be used with: [dooglz/gpuvis](https://github.com/dooglz/gpuvis)
+- docker
+    - dockerfile for building and running gpuvis+webserver
+
+## CONTRIBUTING
+See [CONTRIBUTING.md](https://github.com/dooglz/gpuvis_server/blob/master/CONTRIBUTING.md)
