@@ -42,3 +42,11 @@ if(${GPUVIS_build_docs})
     message("Doxygen need to be installed to generate the doxygen documentation")
   endif (DOXYGEN_FOUND)
 endif(${GPUVIS_build_docs})
+
+
+
+#add_custom_target(git_revision.h
+ 
+# 
+
+#add_dependencies(gpuvis_simulator git_revision.h)

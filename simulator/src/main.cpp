@@ -1,31 +1,38 @@
 #include "gpuvis.h"
-#include "isa/isa.h"
+#include "amdgpu_operations.h"
 #include "output.h"
-#include "parser.h"
+#include "program.h"
 #include "simulator.h"
 #include <string>
+// git_revision built by pre-build step.
+#define GIT_REVISION 000
+#include "git_revision.h"
+//
 
-const std::string gpuvis::hello() { return "Hello Simulator World"; }
+constexpr auto GPUVIS_VERISON = "0.1 ( GIT_REVISION )";
 
-static std::map<uint16_t, std::unique_ptr<parser::Program>> pgrm_db;
+const std::string gpuvis::version() { return GPUVIS_VERISON; }
+
+static std::map<uint16_t, std::unique_ptr<Program>> pgrm_db;
 static uint16_t key = 0;
 
-auto findpgrm(int id) {
+Program &findpgrm(int id) noexcept(false) {
   auto a = pgrm_db.find(id);
   if (a == pgrm_db.end()) {
-    throw("Invalid ProgramID");
+    throw std::invalid_argument("Invalid ProgramID");
   }
-  return a;
+  return *(a->second.get());
 }
 
-const int gpuvis::loadSource(int pgrmid, const std::string& src) {
-  auto a = findpgrm(pgrmid);
-  (a->second)->source = src;
-  return 0;
+/// assigns source text to program.
+void gpuvis::setSource(int pgrmid, const std::string &sourceString) {
+  auto &p = findpgrm(pgrmid);
+  p.source = sourceString;
 }
 
-const int gpuvis::loadProgram(const std::string& pgrm, const std::string& name) {
-  auto a = parser::parse(pgrm,name);
+/// Load program, returns Id. 0 == Error
+const uint16_t gpuvis::loadProgram(const std::string &pgrm, const std::string &name) {
+  auto a = Program::parse(pgrm, name);
   if (a != nullptr) {
     simulator::pgrmstats(*a);
     pgrm_db[++key] = std::move(a);
@@ -35,36 +42,33 @@ const int gpuvis::loadProgram(const std::string& pgrm, const std::string& name) 
 }
 
 const int gpuvis::runProgram(int pgrmid, int gpuid) {
-  auto a = findpgrm(pgrmid);
-  bool result = simulator::run(*(a->second), gpuid);
+  bool result = simulator::run(findpgrm(pgrmid), gpuid);
   return (result ? 1 : 0);
 }
 
 const simulator::SimulationSummary summary(int pgrmid, int gpuid) {
-  auto a = findpgrm(pgrmid);
-  simulator::SimulationSummary summary{{simulator::summary(*(a->second), gpuid)},
-                                       (a->second)->source};
+  auto &p = findpgrm(pgrmid);
+  simulator::SimulationSummary summary{{simulator::summary(p, gpuid)}, p.source};
   return summary;
 }
 
-const simulator::SimulationSummary summary(const std::vector<int>& pgrmids, int gpuid) {
+const simulator::SimulationSummary summary(const std::vector<int> &pgrmids, int gpuid) {
   std::vector<simulator::ProgramSummary> ps;
   std::string source;
   for (auto pgm : pgrmids) {
-    auto a = findpgrm(pgm);
-    ps.push_back(simulator::summary(*(a->second), gpuid));
-    source = (a->second)->source;
+    auto& p = findpgrm(pgm);
+    ps.push_back(simulator::summary(p, gpuid));
+    source = p.source;
   }
   simulator::SimulationSummary summary{ps, source};
   return summary;
 }
 
-std::string gpuvis::summaryJSON(const std::vector<int>& pgrmids, int gpuid) {
+std::string gpuvis::summaryJSON(const std::vector<int> &pgrmids, int gpuid) {
   return output::gimmyjson(summary(pgrmids, gpuid));
 }
 
-std::vector<std::uint8_t> gpuvis::summaryMSGPK(const std::vector<int>& pgrmids,
-                                               int gpuid) {
+std::vector<std::uint8_t> gpuvis::summaryMSGPK(const std::vector<int> &pgrmids, int gpuid) {
   return output::gimmyMsgPack(summary(pgrmids, gpuid));
 }
 

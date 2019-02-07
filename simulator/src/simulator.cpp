@@ -1,4 +1,4 @@
-#include "isa/isa.h"
+#include "amdgpu_operations.h"
 #include "simulator.h"
 #include "gpu/gpu.h"
 #include <iostream>
@@ -15,7 +15,7 @@ const int init() {
   return key;
 }
 
-bool run(const parser::Program& pgrm, const int GPUID) {
+bool run(const Program& pgrm, const int GPUID) {
   auto a = gpu_db.find(GPUID);
   if (a == gpu_db.end()) {
     throw("INVALID GPU ID");
@@ -34,7 +34,7 @@ bool run(const parser::Program& pgrm, const int GPUID) {
   return true;
 }
 
-void pgrmstats(const parser::Program& pgrm) {
+void pgrmstats(const Program& pgrm) {
   std::cout << "---\nProgram Stats " << pgrm.name<<"\n";
   std::map<OPCODE_TYPE, size_t> opcount;
   size_t vregr = 0, vregw = 0, sregr = 0, sregw = 0;
@@ -81,7 +81,7 @@ void GetRegisterActivity(GPU& gpu) {
 
 }
 
-ProgramSummary summary(const parser::Program& pgrm, const int GPUID) {
+ProgramSummary summary(const Program& pgrm, const int GPUID) {
   auto a = gpu_db.find(GPUID);
   if (a == gpu_db.end()) {
     throw("INVALID GPU ID");

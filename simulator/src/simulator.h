@@ -1,12 +1,12 @@
 #pragma once
-#include "isa/isa.h"
-#include "parser.h"
+#include "amdgpu_operations.h"
+#include "program.h"
 #include <tuple>
 
 namespace simulator {
 const int init();
-bool run(const parser::Program& pgrm, int GPUID);
-void pgrmstats(const parser::Program& pgrm);
+bool run(const Program& pgrm, int GPUID);
+void pgrmstats(const Program& pgrm);
 
 struct RegisterEvent {
   const std::string who;
@@ -30,6 +30,6 @@ struct SimulationSummary {
 
 
 
-ProgramSummary summary(const parser::Program& pgrm, int GPUID);
+ProgramSummary summary(const Program& pgrm, int GPUID);
 
 } // namespace simulator

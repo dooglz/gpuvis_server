@@ -1,7 +1,8 @@
 #include "gpu.h"
-#include "../isa/isa.h"
-#include "../isa/fiji.h"
-#include "../parser.h"
+#include "../amdgpu_operations.h"
+//#include "../isa/fiji.h"
+#include <isa.h>
+#include "../program.h"
 #include <iostream>
 using namespace isa;
 const void Register::read(const operand &addr) {
@@ -48,7 +49,7 @@ bool SimdUnit::tick(const actual_operation op) {
 
 bool GPU::tick(const actual_operation op) {
   tickcount++;
-  if (op.op->opcode == s_endpgm) {
+  if (op.op->opcode_str == "s_endpgm") {
     state = END;
   }
 

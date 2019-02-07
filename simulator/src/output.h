@@ -1,5 +1,5 @@
 #pragma once
-#include "isa/isa.h"
+#include "amdgpu_operations.h"
 #include "json.hpp"
 #include "simulator.h"
 #include <string>

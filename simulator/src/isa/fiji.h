@@ -1,7 +1,7 @@
 //#define REGS(...) std::vector<uint8_t>({__VA_ARGS__})
 //#define OP(opcode, type, branch, ticks, help, r, w){ #opcode, opcode, type, branch,
 // ticks, #help, r, w }
-#include "isa.h"
+#include "../amdgpu_operations.h"
 namespace isa {
 
   enum ISAe {

@@ -92,10 +92,7 @@ void inputFile(const std::vector<std::string>& ip, const std::string& source = "
     }
     programs.push_back(p.program);
     if (!programSourceString.empty()) {
-      auto ret = gpuvis::loadSource(p.program, programSourceString);
-      if (ret != 0) {
-        throw std::runtime_error("Problem loadSource");
-      }
+      gpuvis::setSource(p.program, programSourceString);
     }
   }
 
