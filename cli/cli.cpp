@@ -5,6 +5,16 @@
 #include <fstream>
 #include <iostream>
 #include <string>
+
+#ifdef _WIN64
+// for win 10 , add reg value: Auto(REG_DWORD) = 1, to:
+// HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\AeDebug
+#define sigtrap __debugbreak()
+#else
+#define void()
+#endif
+
+
 bool mp, b64;
 std::string outputfile;
 
@@ -160,6 +170,8 @@ void inputFile(const std::vector<std::string>& ip, const std::string& source = "
 }
 
 int main(int argc, char** argv) {
+  
+  sigtrap;
 
   CLI::App app("GPUVIS Server CLI");
   std::vector<std::string> files;
@@ -171,6 +183,9 @@ int main(int argc, char** argv) {
   app.add_flag("-b,--b64,", b64, "Base64 Encode Output");
 
   CLI11_PARSE(app, argc, argv);
+
+
+
   /*
   mp = true;
   b64 = true;

@@ -20,13 +20,14 @@ class GPUVIS {
         return this._call(cmdline,false,123).then(() => outputfilename);
     }
 
-    _call(cmdline, rejectonStdError = false, verboseflag = false) {
+    _call(cmdline, rejectonStdError = false, verboseflag = true) {
         let p_e = () => { };
         let p_l = p_e;
         if (verboseflag) {
             p_e = (...s) => console.error(verboseflag + " " + s);
             p_l = (...s) => console.log(verboseflag + " " + s);
         }
+		console.log(cmdline);
         if (typeof (cmdline) === "string") { cmdline = [cmdline]; }
         const binary = this.gpuvisBinaryLocation;
         return new Promise(function (resolve, reject) {
@@ -36,7 +37,8 @@ class GPUVIS {
                 let output = "";
                 const ls = spawn(binary, cmdline, {
                     windowsVerbatimArguments: true,
-                    shell: true
+                    shell: false,
+					detached: true
                 });
                 ls.on('error', function (e) {
                     p_e("Can't spawn Gpuvis", e);
