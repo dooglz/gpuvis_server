@@ -169,9 +169,43 @@ void inputFile(const std::vector<std::string>& ip, const std::string& source = "
   }
 }
 
+struct Entity {
+  int a;
+  void foo() { a++; }
+  void constfoo() const {}
+};
+
+struct component {
+  //E1 is a non-const pointer to a Const Entity
+  //The pointer can be changed to point to a new const Entity.
+  const Entity *e1;
+  //E2 is a Const pointer to a non const Entity. 
+  //We can do whatver we want to the entity, but we can't change the pointer.
+  Entity *const e2;
+  //E3 Const pointer to a const entity.
+  const Entity *const e3;
+
+  component(): e1(),e2(),e3() {
+    //call a const function
+    e1->constfoo(); //can
+    e2->constfoo(); //can
+    e3->constfoo(); //can
+    //callling non-const function
+    e1->foo(); //can't
+    e2->foo(); //can
+    e3->foo(); //can't
+    //Change E
+    e1 = new Entity(); //can
+    e2 = new Entity(); //can't
+    e3 = new Entity(); //can't
+  }
+};
+
+
+
 int main(int argc, char** argv) {
   
-  sigtrap;
+  //sigtrap;
 
   CLI::App app("GPUVIS Server CLI");
   std::vector<std::string> files;
@@ -183,6 +217,8 @@ int main(int argc, char** argv) {
   app.add_flag("-b,--b64,", b64, "Base64 Encode Output");
 
   CLI11_PARSE(app, argc, argv);
+
+
 
 
 

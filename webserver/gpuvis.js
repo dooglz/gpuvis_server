@@ -45,7 +45,7 @@ class GPUVIS {
                     reject(e);
                 });
                 ls.stderr.on('data', (data) => {
-                    let str = "" + data;
+                    let str = data.toString();
                     str.split(/\r?\n/).forEach((d) =>{ errorstrings+=(d+". "); p_l("Gpuvis stderr:", d)});
                     anystderror = true;
                 });
@@ -57,9 +57,9 @@ class GPUVIS {
                     }
                 });
                 ls.stdout.on('data', (data) => {
-                    let str = "" + data;
-                    output += data;
-                    str.split(/\r?\n/).forEach((d) => p_l("Gpuvis stdout:", encodeURI(d)));
+                    let str = data.toString()
+                    output += str;
+                    str.split(/\r?\n/).forEach((d) => p_l("Gpuvis stdout:", (d)));
                 });
             } catch (e) {
                 p_e("Can't spawn Gpuvis", e);

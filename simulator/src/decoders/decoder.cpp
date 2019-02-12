@@ -176,7 +176,7 @@ const bool rga_2_disasm_compute::parseASM(const std::string &input, const operat
       handleLineNum(input);
       return false;
     }
-    const auto opi = isa::getOpt(opcode);
+    const auto& opi = isa::getOpt(opcode);
     std::vector<operand> operands;
     for (size_t i = 1; i < tokens.size(); i++) {
       if (tokens[i] == "//") {
