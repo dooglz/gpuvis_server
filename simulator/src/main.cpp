@@ -6,12 +6,15 @@
 #include <string>
 // git_revision built by pre-build step.
 #define GIT_REVISION 000
+#define GPUVIS_VERISON 0.1
 #include "git_revision.h"
+#define TO_STR2(x) #x
+#define TO_STR(x) TO_STR2(x)
+#define VERSION_STRING TO_STR(GPUVIS_VERISON) " (" TO_STR(GIT_REVISION) ")"
 //
 
-constexpr auto GPUVIS_VERISON = "0.1 ( GIT_REVISION )";
 
-const std::string gpuvis::version() { return GPUVIS_VERISON; }
+const std::string gpuvis::version() { return VERSION_STRING; }
 
 static std::map<uint16_t, std::unique_ptr<Program>> pgrm_db;
 static uint16_t key = 0;

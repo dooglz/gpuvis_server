@@ -1,4 +1,3 @@
 mkdir run_$<CONFIG>
 cd run_$<CONFIG>
 node @INDEXJS@ --gpuvis $<TARGET_FILE:gpuvis_cli> --rga C:/rga/rga.exe %*
-pause >nul

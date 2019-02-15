@@ -77,7 +77,7 @@ app.use(function (req, res, next) {
 const rga = new RGA(options.rga, options.rgaintDir);
 rga.version().then(v => console.log(v));
 const gpuvis = new GPUVIS(options.gpuvis, options.gpuvisintDir);
-gpuvis.version().then(v => console.log(v));
+gpuvis.version().then(v => console.log("GPUVIS Version:",v));
 
 app.post('/upload', function (req, res) {
   const uuid = uuidv4();
@@ -115,7 +115,8 @@ if (options.https) {
   insecureserver.on('error', (e) => console.error("http server error, ", e));
   insecureserver.listen(80);
 } else {
-  app.listen(options.port, () => console.log(`Example app listening on port ${options.port}!`));
+  let server = app.listen(options.port);
+  console.log(`GPUVIS_webserver listening on  ${server.address().address} : ${server.address().port}`)
 }
 
 

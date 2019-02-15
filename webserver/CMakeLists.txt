@@ -2,7 +2,8 @@
 cmake_minimum_required (VERSION 3.11)
 project (webserver LANGUAGES NONE)
 file(GLOB INDEXJS index.js)
-add_custom_target(webserver SOURCES ${INDEXJS})
+file(GLOB OTHERJS gpuvis.js rga.js)
+add_custom_target(webserver SOURCES ${INDEXJS} ${OTHERJS})
 
 IF (WIN32)
   #Create a nice batch script with correct absolute paths
