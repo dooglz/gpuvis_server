@@ -169,39 +169,6 @@ void inputFile(const std::vector<std::string>& ip, const std::string& source = "
   }
 }
 
-struct Entity {
-  int a;
-  void foo() { a++; }
-  void constfoo() const {}
-};
-
-struct component {
-  //E1 is a non-const pointer to a Const Entity
-  //The pointer can be changed to point to a new const Entity.
-  const Entity *e1;
-  //E2 is a Const pointer to a non const Entity. 
-  //We can do whatver we want to the entity, but we can't change the pointer.
-  Entity *const e2;
-  //E3 Const pointer to a const entity.
-  const Entity *const e3;
-
-  component(): e1(),e2(),e3() {
-    //call a const function
-    e1->constfoo(); //can
-    e2->constfoo(); //can
-    e3->constfoo(); //can
-    //callling non-const function
-    e1->foo(); //can't
-    e2->foo(); //can
-    e3->foo(); //can't
-    //Change E
-    e1 = new Entity(); //can
-    e2 = new Entity(); //can't
-    e3 = new Entity(); //can't
-  }
-};
-
-
 
 int main(int argc, char** argv) {
   
@@ -210,18 +177,20 @@ int main(int argc, char** argv) {
   CLI::App app("GPUVIS Server CLI");
   std::vector<std::string> files;
   std::string source = "";
-  app.add_option("-f,--files,file", files, "input asm file(s)")->required();
-  app.add_option("-o,--output", outputfile, "output file, default stdout");
-  app.add_option("-s,--source", source, "input source file [needs correct asm]");
-  app.add_flag("-m,--messagepack,", mp, "Output in Encoded Messagepack, default JSON");
-  app.add_flag("-b,--b64,", b64, "Base64 Encode Output");
+  bool version = false;
+  app.add_flag("-v,--version", version, "print version string and exit");
+  auto fopt = app.add_option("-f,--files,file", files, "input asm file(s)");
+  app.add_option("-o,--output", outputfile, "output file, default stdout")->needs(fopt);
+  app.add_option("-s,--source", source, "input source file [needs correct asm]")->needs(fopt);
+  app.add_flag("-m,--messagepack,", mp, "Output in Encoded Messagepack, default JSON")->needs(fopt);
+  app.add_flag("-b,--b64,", b64, "Base64 Encode Output")->needs(fopt);
 
   CLI11_PARSE(app, argc, argv);
 
-
-
-
-
+  if (version) {
+    std::cout << gpuvis::version() << std::endl;
+    return 0;
+  }
   /*
   mp = true;
   b64 = true;

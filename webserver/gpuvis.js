@@ -10,8 +10,8 @@ class GPUVIS {
         this.gpuvisOutputDirectory = gpuvisOutputDirectory;
     }
     async version() {
-        // return concat(await this._call("--version"));
-        return "";
+      // return concat(await this._call("--version"));
+      return 2;
     }
     async run(inputfilenames, outputfilename, source = "") {
         let cmdline = [

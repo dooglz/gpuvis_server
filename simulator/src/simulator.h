@@ -4,8 +4,7 @@
 #include <tuple>
 
 namespace simulator {
-const int init();
-bool run(const Program& pgrm, int GPUID);
+bool run(const Program& pgrm);
 void pgrmstats(const Program& pgrm);
 
 struct RegisterEvent {

@@ -9,7 +9,7 @@
 #include "git_revision.h"
 //
 
-constexpr auto GPUVIS_VERISON = "0.1 ( GIT_REVISION )";
+#define GPUVIS_VERISON = "0.1 (" GIT_REVISION ")"
 
 const std::string gpuvis::version() { return GPUVIS_VERISON; }
 
@@ -71,5 +71,3 @@ std::string gpuvis::summaryJSON(const std::vector<int> &pgrmids, int gpuid) {
 std::vector<std::uint8_t> gpuvis::summaryMSGPK(const std::vector<int> &pgrmids, int gpuid) {
   return output::gimmyMsgPack(summary(pgrmids, gpuid));
 }
-
-const int gpuvis::initGPU() { return simulator::init(); }

@@ -106,7 +106,7 @@ struct Memory {};
 class GPU {
 public:
   GPU(size_t CUs, size_t SimdUs, size_t SLanes);
-  GPU() = delete;
+  GPU();
   GPU(const GPU &) = delete;
   ~GPU();
   //

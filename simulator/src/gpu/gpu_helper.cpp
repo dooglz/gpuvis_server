@@ -100,6 +100,8 @@ GPU::GPU(size_t CUs, size_t SimdUs, size_t SLanes) {
   }
 }
 
+GPU::GPU() : GPU(R9Fury){}
+
 ComputeUnit::ComputeUnit(size_t SimdUs, size_t SLanes, const GPU &gpu, size_t id, GPU_Component *const parent)
     : GPU_Component(gpu, id, parent, "CU"), SU(gpu, this), LDS(gpu, this) {
   for (size_t i = 1; i <= SimdUs; ++i) {

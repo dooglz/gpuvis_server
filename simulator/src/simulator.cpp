@@ -5,29 +5,17 @@
 
 namespace simulator {
 
-static std::map<uint16_t, std::unique_ptr<GPU>> gpu_db;
-static uint16_t key = 0;
+bool run(const Program& pgrm) {
 
-const int init() {
-  std::unique_ptr<GPU> gpu = std::make_unique<GPU>(R9Fury);
-  gpu->launchParameters({64, 1, 1});
-  gpu_db[++key] = std::move(gpu);
-  return key;
-}
+  auto gpu = std::make_unique<GPU>();
+  gpu->launchParameters({ 64, 1, 1 });
 
-bool run(const Program& pgrm, const int GPUID) {
-  auto a = gpu_db.find(GPUID);
-  if (a == gpu_db.end()) {
-    throw("INVALID GPU ID");
-    return false;
-  }
-  GPU& gpu = *a->second;
   auto op = pgrm.ops.begin();
-  while (gpu.state == GPU::READY && op != pgrm.ops.end()) {
-    gpu.tick(*op);
+  while (gpu->state == GPU::READY && op != pgrm.ops.end()) {
+    gpu->tick(*op);
     op++;
   }
-  if (gpu.state != GPU::END) {
+  if (gpu->state != GPU::END) {
     std::cerr << "Program execution fininished in error state! " << std::endl;
   }
 
