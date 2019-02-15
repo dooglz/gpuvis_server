@@ -153,7 +153,7 @@ std::unique_ptr<Program> rga_2_disasm_compute::parse(const std::string &input, c
 }
 
 void rga_2_disasm_compute::handleLineNum(const std::string &line) {
-  std::cerr << "asm: LineNum: " << line << std::endl;
+  std::cout << "asm: LineNum: " << line << std::endl;
   const auto tokens = split<std::string>(line, ":");
   if (!tokens.empty() && tokens.size() > 1) {
     int src_ln = -1;

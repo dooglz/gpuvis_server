@@ -6,15 +6,18 @@
 #include <string>
 // git_revision built by pre-build step.
 #define GIT_REVISION 000
+#define GPUVIS_VERISON 0.1
 #include "git_revision.h"
+#define TO_STR2(x) #x
+#define TO_STR(x) TO_STR2(x)
+#define VERSION_STRING TO_STR(GPUVIS_VERISON) " (" TO_STR(GIT_REVISION) ")"
 //
 
-#define GPUVIS_VERISON = "0.1 (" GIT_REVISION ")"
 
-const std::string gpuvis::version() { return GPUVIS_VERISON; }
+const std::string gpuvis::version() { return VERSION_STRING; }
 
-static std::map<uint16_t, std::unique_ptr<Program>> pgrm_db;
-static uint16_t key = 0;
+std::map<uint16_t, std::unique_ptr<Program>> pgrm_db;
+uint16_t key = 0;
 
 Program &findpgrm(int id) noexcept(false) {
   auto a = pgrm_db.find(id);
@@ -41,33 +44,16 @@ const uint16_t gpuvis::loadProgram(const std::string &pgrm, const std::string &n
   return 0;
 }
 
-const int gpuvis::runProgram(int pgrmid, int gpuid) {
-  bool result = simulator::run(findpgrm(pgrmid), gpuid);
+const int gpuvis::runProgram(int pgrmid) {
+  bool result = simulator::run(findpgrm(pgrmid));
   return (result ? 1 : 0);
 }
 
-const simulator::SimulationSummary summary(int pgrmid, int gpuid) {
-  auto &p = findpgrm(pgrmid);
-  simulator::SimulationSummary summary{{simulator::summary(p, gpuid)}, p.source};
-  return summary;
+
+std::string gpuvis::summaryJSON(const std::vector<int> &pgrmids) {
+  return output::gimmyjson(pgrmids);
 }
 
-const simulator::SimulationSummary summary(const std::vector<int> &pgrmids, int gpuid) {
-  std::vector<simulator::ProgramSummary> ps;
-  std::string source;
-  for (auto pgm : pgrmids) {
-    auto& p = findpgrm(pgm);
-    ps.push_back(simulator::summary(p, gpuid));
-    source = p.source;
-  }
-  simulator::SimulationSummary summary{ps, source};
-  return summary;
-}
-
-std::string gpuvis::summaryJSON(const std::vector<int> &pgrmids, int gpuid) {
-  return output::gimmyjson(summary(pgrmids, gpuid));
-}
-
-std::vector<std::uint8_t> gpuvis::summaryMSGPK(const std::vector<int> &pgrmids, int gpuid) {
-  return output::gimmyMsgPack(summary(pgrmids, gpuid));
+std::vector<std::uint8_t> gpuvis::summaryMSGPK(const std::vector<int> &pgrmids) {
+  return output::gimmyMsgPack(pgrmids);
 }

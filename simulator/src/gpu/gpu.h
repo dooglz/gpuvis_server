@@ -124,7 +124,7 @@ public:
   enum GPUstate { READY, END, CRASH };
   GPUstate state;
   //
-  const std::vector<Register *> GetAllRegisters();
+  const std::vector<const Register *> GetAllRegisters() const;
 };
 
 static void gpustats(const GPU &gpu);

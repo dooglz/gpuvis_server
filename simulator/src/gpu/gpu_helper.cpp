@@ -133,8 +133,8 @@ void GPU::launchParameters(size_tV lp) {
   std::cout << "gpu: launch: " << lp << " cus:" << active_cus << std::endl;
 }
 
-const std::vector<Register *> GPU::GetAllRegisters() {
-  std::vector<Register *> ret;
+const std::vector<const Register *> GPU::GetAllRegisters() const {
+  std::vector<const Register *> ret;
   for (auto& a : computeUnits) {
     for (auto& b : a.simdUnits) {
       for (auto& c : b.simdLanes) {

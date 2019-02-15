@@ -10,8 +10,7 @@ class GPUVIS {
         this.gpuvisOutputDirectory = gpuvisOutputDirectory;
     }
     async version() {
-      // return concat(await this._call("--version"));
-      return 2;
+         return concat(await this._call("--version"));
     }
     async run(inputfilenames, outputfilename, source = "") {
         let cmdline = [
@@ -20,14 +19,15 @@ class GPUVIS {
         return this._call(cmdline,false,123).then(() => outputfilename);
     }
 
-    _call(cmdline, rejectonStdError = false, verboseflag = true) {
+    _call(cmdline, rejectonStdError = false, verboseflag = false) {
         let p_e = () => { };
         let p_l = p_e;
+        p_e = (...s) => console.error(verboseflag + " " + s);
         if (verboseflag) {
-            p_e = (...s) => console.error(verboseflag + " " + s);
+            console.log(cmdline);
             p_l = (...s) => console.log(verboseflag + " " + s);
         }
-		console.log(cmdline);
+
         if (typeof (cmdline) === "string") { cmdline = [cmdline]; }
         const binary = this.gpuvisBinaryLocation;
         return new Promise(function (resolve, reject) {
@@ -38,7 +38,7 @@ class GPUVIS {
                 const ls = spawn(binary, cmdline, {
                     windowsVerbatimArguments: true,
                     shell: false,
-					detached: true
+                    detached: true
                 });
                 ls.on('error', function (e) {
                     p_e("Can't spawn Gpuvis", e);
@@ -46,7 +46,7 @@ class GPUVIS {
                 });
                 ls.stderr.on('data', (data) => {
                     let str = data.toString();
-                    str.split(/\r?\n/).forEach((d) =>{ errorstrings+=(d+". "); p_l("Gpuvis stderr:", d)});
+                    str.split(/\r?\n/).forEach((d) =>{ errorstrings+=(d+". "); p_e("Gpuvis stderr:", d)});
                     anystderror = true;
                 });
                 ls.on('close', (code) => {
