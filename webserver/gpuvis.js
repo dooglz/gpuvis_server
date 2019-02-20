@@ -12,11 +12,11 @@ class GPUVIS {
     async version() {
          return concat(await this._call("--version"));
     }
-    async run(inputfilenames, outputfilename, source = "") {
+    async run(inputfilenames, outputfilename, source = "", verboseflag = false) {
         let cmdline = [
             "-f " + inputfilenames.join(' '), "-o " + outputfilename, "-m", (source != "" ? "-s " + source : "")
         ];
-        return this._call(cmdline,false,123).then(() => outputfilename);
+        return this._call(cmdline,false,verboseflag).then(() => outputfilename);
     }
 
     _call(cmdline, rejectonStdError = false, verboseflag = false) {

@@ -150,20 +150,21 @@ function processUpload(fileondisk, uuid, fileinMemory, req, res) {
     res.status(400).send(uuid + " Can't read filetype:" + filetype);
     return;
   }
-
+  const verboseflag =  (options.verbose ? uuid : false);
   if (filetype === "RGA_ASM_COMPUTE") {
-    gpuvis.run(fileondisk)
+   /* gpuvis.run(fileondisk, options.verbose ? uuid : false)
       .then((outfile) => fileExists_p(outfile), PassReject)
       .then((outfile) => sendDataToSite_p(res, outfile), PassReject)
       .catch((rejectionError) => {
         console.error(uuid, "chain error ", rejectionError);
         res.status(500).send(uuid + " Internal Server Error");
-      });
+      });*/
+      res.status(500).send(uuid + " RGA_ASM_COMPUTE no longer supported");
   } else if (filetype === "OCL_SOURCE") {
     const oclSrc_fileondisk = fileondisk;
-    rga.doCL(oclSrc_fileondisk, rgaOutPath)
+    rga.doCL(oclSrc_fileondisk, rgaOutPath,verboseflag)
       .then(() => findFilesLike_p(options.rgaintDir, uuid), PassReject)
-      .then((files) => gpuvis.run(files, gpuvisOutPath, oclSrc_fileondisk), PassReject)
+      .then((files) => gpuvis.run(files, gpuvisOutPath, oclSrc_fileondisk, verboseflag), PassReject)
       .then((outfile) => fileExists_p(outfile), PassReject)
       .then((outfile) => sendDataToSite_p(res, outfile), PassReject)
       .catch((rejectionError) => {
@@ -172,9 +173,9 @@ function processUpload(fileondisk, uuid, fileinMemory, req, res) {
       });
   } else if (shadertypes.includes(filetype)) {
     const shaderSrc_fileondisk = fileondisk;
-    rga.doShader(filetype, shaderSrc_fileondisk, rgaOutPath)
+    rga.doShader(filetype, shaderSrc_fileondisk, rgaOutPath,verboseflag)
       .then(() => findFilesLike_p(options.rgaintDir, uuid), PassReject)
-      .then((files) => gpuvis.run(files, gpuvisOutPath, shaderSrc_fileondisk), PassReject)
+      .then((files) => gpuvis.run(files, gpuvisOutPath, shaderSrc_fileondisk, verboseflag), PassReject)
       .then((outfile) => fileExists_p(outfile), PassReject)
       .then((outfile) => sendDataToSite_p(res, outfile), PassReject)
       .catch((rejectionError) => {

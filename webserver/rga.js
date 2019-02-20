@@ -12,7 +12,7 @@ class RGA {
     async version() {
         return concat(await this._call("--version"));
     }
-    async doCL(inputfilename, outputfilename) {
+    async doCL(inputfilename, outputfilename, verboseflag = false) {
         if (!inputfilename.endsWith(".cl")) {
             fs.copyFile(inputfilename, inputfilename + '.cl', (err) => {
                 if (err) { return Promise.reject("can't make temp .cl file"); }
@@ -21,13 +21,13 @@ class RGA {
         }
         let cmdline = ["-s rocm-cl -c gfx900 --line-numbers --isa ", outputfilename, inputfilename];
         //Todo: parse stdout to detect build failure.
-        return this._call(cmdline);
+        return this._call(cmdline,verboseflag);
     }
-    async doFragShader(inputfilename, outputfilename) {
+    async doFragShader(inputfilename, outputfilename, verboseflag = false) {
         let option = ["-s rocm-cl -c gfx900 --line-numbers --isa ", outputfilename, inputfilename];
-        return this._call(cmdline);
+        return this._call(cmdline,verboseflag);
     }
-    async doShader(type, inputfilename, outputfilename) {
+    async doShader(type, inputfilename, outputfilename, verboseflag = false) {
         let inputstring = "";
         if (type == "GLSL_VERT_SOURCE") {
             inputstring = "--vert";
@@ -41,15 +41,16 @@ class RGA {
             inputstring = "--tese";
         }
         let cmdline = ["-s vulkan -c gfx900 --isa ", outputfilename, inputstring+' '+inputfilename];
-        return this._call(cmdline);
+        return this._call(cmdline,verboseflag);
     }
 
 
-    _call(cmdline, verboseflag) {
+    _call(cmdline, verboseflag = false) {
         let p_e = () => { };
         let p_l = p_e;
+        p_e = (...s) => console.error(verboseflag + " " + s);
         if (verboseflag) {
-            p_e = (...s) => console.error(verboseflag + " " + s);
+            console.log(cmdline);
             p_l = (...s) => console.log(verboseflag + " " + s);
         }
         if (typeof (cmdline) === "string") { cmdline = [cmdline]; }
