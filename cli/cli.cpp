@@ -11,7 +11,7 @@
 // HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\AeDebug
 #define sigtrap __debugbreak()
 #else
-#define void()
+#define sigtrap void()
 #endif
 
 bool mp, b64;
@@ -196,6 +196,10 @@ int main(int argc, char **argv) {
   b64 = true;
   outputfile = "output/mp_b64.txt";
   */
+  if(files.empty()){
+    return 0;
+  }
+
   try {
     inputFile(files, source);
   } catch (const std::exception &e) {

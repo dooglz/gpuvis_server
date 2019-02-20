@@ -14,6 +14,12 @@ IF (WIN32)
     OUTPUT run_windows_$<CONFIG>.bat
     INPUT ${CMAKE_CURRENT_BINARY_DIR}/run_windows.bat.cfgd
   )
+else(WIN32)
+  configure_file(run.sh.in ${CMAKE_CURRENT_BINARY_DIR}/run.sh.cfgd @ONLY)
+  file(GENERATE
+        OUTPUT run_$<CONFIG>.sh
+        INPUT ${CMAKE_CURRENT_BINARY_DIR}/run.sh.cfgd
+        )
 endif(WIN32)
 
 add_dependencies(webserver gpuvis_cli)

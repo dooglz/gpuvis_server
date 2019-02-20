@@ -7,7 +7,7 @@
 // git_revision built by pre-build step.
 #define GIT_REVISION 000
 #define GPUVIS_VERISON 0.1
-#include "git_revision.h"
+//#include "git_revision.h" //todo fix for unix
 #define TO_STR2(x) #x
 #define TO_STR(x) TO_STR2(x)
 #define VERSION_STRING TO_STR(GPUVIS_VERISON) " (" TO_STR(GIT_REVISION) ")"
