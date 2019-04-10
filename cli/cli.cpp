@@ -14,12 +14,24 @@
 #define sigtrap void()
 #endif
 
+#ifdef __linux__
+#include <algorithm>
+#include <iterator>
+#include <sstream>
+#endif
+
 bool mp, b64;
 std::string outputfile;
 
 static const std::string base64_chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
                                         "abcdefghijklmnopqrstuvwxyz"
                                         "0123456789+/";
+
+const auto trimwhite = [](std::string &a) {
+  while (a.size() > 1 && a[0] == ' ') {
+    a = a.substr(1);
+  }
+};
 
 std::string base64_encode(unsigned char const *bytes_to_encode, unsigned int in_len) {
   std::string ret;
@@ -60,7 +72,7 @@ std::string base64_encode(unsigned char const *bytes_to_encode, unsigned int in_
   return ret;
 }
 
-void inputFile(const std::vector<std::string> &ip, const std::string &source = "") {
+void inputFile(std::vector<std::string> ip, const std::string &source = "") {
 
   struct inputprogram {
     std::string filepath;
@@ -72,19 +84,48 @@ void inputFile(const std::vector<std::string> &ip, const std::string &source = "
   std::vector<int> programs;
 
   std::vector<inputprogram> inputprograms;
+
+// Hack fix for CLI11 shitty list parsing
+#ifdef __linux__
+  if (ip.size() == 1) {
+    std::vector<std::string> ips;
+    std::istringstream iss(ip[0]);
+    std::copy(std::istream_iterator<std::string>(iss), std::istream_iterator<std::string>(), std::back_inserter(ips));
+    ip = ips;
+  }
+#endif
+
   for (auto ipi : ip) {
-    std::ifstream t(ipi);
+    // trim leading whitespace
+    trimwhite(ipi);
+    std::ifstream t;
+    // Set exceptions to be thrown on failure
+    t.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+    try {
+      t.open(ipi);
+    } catch (std::system_error &e) {
+      throw std::runtime_error("Can't open input Asm file! (" + ipi + ") " + e.code().message());
+    }
     std::string str((std::istreambuf_iterator<char>(t)), std::istreambuf_iterator<char>());
     t.close();
     if (str.empty()) {
-      throw std::runtime_error("Can't open input Asm! " + ipi);
+      throw std::runtime_error("Can't Parse file: (" + ipi + ")");
     }
     inputprograms.push_back({ipi, ipi.substr(ipi.find_last_of("/\\") + 1, 32), str, 0});
   }
 
   std::string programSourceString;
   if (!source.empty()) {
-    std::ifstream srct(source);
+    auto _source = source;
+    trimwhite(_source);
+    std::ifstream srct;
+    // Set exceptions to be thrown on failure
+    srct.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+    try {
+      srct.open(_source);
+    } catch (std::system_error &e) {
+      throw std::runtime_error("Can't open input source file! (" + _source + ") " + e.code().message());
+    }
     programSourceString = std::string((std::istreambuf_iterator<char>(srct)), std::istreambuf_iterator<char>());
     srct.close();
     if (programSourceString.empty()) {
@@ -103,8 +144,6 @@ void inputFile(const std::vector<std::string> &ip, const std::string &source = "
     }
   }
 
-
-
   for (auto &p : inputprograms) {
     auto res = gpuvis::runProgram(p.program);
     if (res == 0) {
@@ -112,6 +151,7 @@ void inputFile(const std::vector<std::string> &ip, const std::string &source = "
     }
   }
 
+  trimwhite(outputfile);
   if (!mp) {
     auto json = gpuvis::summaryJSON(programs);
     if (json.empty()) {
@@ -121,7 +161,14 @@ void inputFile(const std::vector<std::string> &ip, const std::string &source = "
       json = base64_encode(reinterpret_cast<const unsigned char *>(json.c_str()), json.length());
     }
     if (!outputfile.empty()) {
-      std::ofstream fout(outputfile, std::ios::out | std::ios::binary);
+      std::ofstream fout;
+      // Set exceptions to be thrown on failure
+      fout.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+      try {
+        fout.open(outputfile, std::ios::out | std::ios::binary);
+      } catch (std::system_error &e) {
+        throw std::runtime_error("Can't Write to output File! (" + outputfile + ") " + e.code().message());
+      }
       fout.write((char *)&json[0], json.size() * sizeof(char));
       fout.close();
     } else {
@@ -135,14 +182,20 @@ void inputFile(const std::vector<std::string> &ip, const std::string &source = "
       throw std::runtime_error("Problem msgpk");
     }
     if (!outputfile.empty()) {
-      std::ofstream fout(outputfile, std::ios::out | std::ios::binary);
+      std::ofstream fout;
+      // Set exceptions to be thrown on failure
+      fout.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+      try {
+        fout.open(outputfile, std::ios::out | std::ios::binary);
+      } catch (std::system_error &e) {
+        throw std::runtime_error("Can't Write to output File! (" + outputfile + ") " + e.code().message());
+      }
       if (b64) {
         std::string b64s = base64_encode(reinterpret_cast<const unsigned char *>(&msgpk[0]), msgpk.size());
         fout.write((char *)&b64s[0], b64s.size() * sizeof(char));
       } else {
         fout.write((char *)&msgpk[0], msgpk.size() * sizeof(uint8_t));
       }
-
       fout.close();
     } else {
       if (b64) {
@@ -160,7 +213,6 @@ void inputFile(const std::vector<std::string> &ip, const std::string &source = "
   }
 }
 
-
 int main(int argc, char **argv) {
 
   CLI::App app("GPUVIS Server CLI");
@@ -170,7 +222,7 @@ int main(int argc, char **argv) {
   bool versionflag = false;
   bool testbreakflag = false;
   app.add_flag("-v,--version", versionflag, "print versionflag, exit");
-#ifdef _DEBUG 
+#ifdef _DEBUG
   app.add_flag("-d,--break", testbreakflag, "Try to hail the Debugger");
 #endif
   auto fopt = app.add_option("-f,--files,file", files, "input asm file(s)");
@@ -196,7 +248,7 @@ int main(int argc, char **argv) {
   b64 = true;
   outputfile = "output/mp_b64.txt";
   */
-  if(files.empty()){
+  if (files.empty()) {
     return 0;
   }
 
