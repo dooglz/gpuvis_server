@@ -1,9 +1,10 @@
 #include "gpu.h"
 #include "../amdgpu_operations.h"
 //#include "../isa/fiji.h"
-#include <isa.h>
 #include "../program.h"
+#include <isa.h>
 #include <iostream>
+
 using namespace isa;
 const void Register::read(const operand &addr) {
   if (addr.isRegister) {

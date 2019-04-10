@@ -5,7 +5,7 @@
 #include <string>
 
 TEST(Example, Equals) { EXPECT_EQ(1, 1); }
-TEST(Simulator, hello) { ASSERT_NE(gpuvis::hello(), ""); }
+//TEST(Simulator, hello) { ASSERT_NE(gpuvis::hello(), ""); }
 
 static int pgrm = 0;
 static int gpu = 0;
@@ -17,12 +17,12 @@ TEST(Simulator, basicprogram) {
 
   pgrm = gpuvis::loadProgram(str);
   ASSERT_GT(pgrm, 0);
-  gpu = gpuvis::initGPU();
+ // gpu = gpuvis::initGPU();
 
-  auto res = gpuvis::runProgram(pgrm, gpu);
+  auto res = gpuvis::runProgram(pgrm);
   ASSERT_GT(res, 0);
 
-  auto json = gpuvis::summaryJSON({pgrm}, gpu);
+  auto json = gpuvis::summaryJSON({pgrm});
 
   ASSERT_NE(json, "") << "empty JSON!";
   std::cout << "output size:" << json.length() << std::endl;

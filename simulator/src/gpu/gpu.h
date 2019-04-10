@@ -11,7 +11,8 @@ struct size_tV {
   }
 };
 inline std::ostream &operator<<(std::ostream &Str, size_tV const &v) {
-  Str << std::string(v);
+	//TODO FIX
+ // Str << std::string(v);
   return Str;
 }
 
