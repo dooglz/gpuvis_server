@@ -11,13 +11,12 @@ static int pgrm = 0;
 static int gpu = 0;
 
 TEST(Simulator, basicprogram) {
-  std::ifstream t("testresources/Fiji_HelloWorld_helloworld.cl_isa.txt");
+  std::ifstream t("testresources/gfx900_helloworld_4d33bf14-d510-4ef0-b9b8-a5e43b98584e.txt");
   std::string str((std::istreambuf_iterator<char>(t)), std::istreambuf_iterator<char>());
   ASSERT_NE(str, "") << "Can't open test file";
 
   pgrm = gpuvis::loadProgram(str);
   ASSERT_GT(pgrm, 0);
- // gpu = gpuvis::initGPU();
 
   auto res = gpuvis::runProgram(pgrm);
   ASSERT_GT(res, 0);

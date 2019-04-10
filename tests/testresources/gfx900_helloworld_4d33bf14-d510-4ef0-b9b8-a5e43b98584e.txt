@@ -1,0 +1,33 @@
+AMD Kernel Code for "helloworld"
+
+Disassembly for "helloworld":
+
+@kernel helloworld:
+; C:\4d33bf14-d510-4ef0-b9b8-a5e43b98584e.txt.cl:3
+; int num = get_global_id(0);
+	s_load_dword s4, s[4:5], 0x4                               // 000000001100: C0020102 00000004 
+	s_load_dwordx2 s[0:1], s[6:7], 0x0                         // 000000001108: C0060003 00000000 
+	s_load_dwordx2 s[2:3], s[6:7], 0x8                         // 000000001110: C0060083 00000008 
+	s_load_dword s5, s[6:7], 0x10                              // 000000001118: C0020143 00000010 
+	s_waitcnt lgkmcnt(0)                                       // 000000001120: BF8CC07F 
+	s_and_b32 s4, s4, 0xffff                                   // 000000001124: 8604FF04 0000FFFF 
+	s_mul_i32 s8, s8, s4                                       // 00000000112C: 92080408 
+	v_add_u32_e32 v0, s8, v0                                   // 000000001130: 68000008 
+	v_add_u32_e32 v2, s5, v0                                   // 000000001134: 68040005 
+; C:\4d33bf14-d510-4ef0-b9b8-a5e43b98584e.txt.cl:4
+; out[num] = in[num] + 1;
+	v_ashrrev_i32_e32 v3, 31, v2                               // 000000001138: 2206049F 
+	v_mov_b32_e32 v1, s1                                       // 00000000113C: 7E020201 
+	v_add_co_u32_e32 v0, vcc, s0, v2                           // 000000001140: 32000400 
+	v_addc_co_u32_e32 v1, vcc, v1, v3, vcc                     // 000000001144: 38020701 
+	global_load_ubyte v0, v[0:1], off                          // 000000001148: DC408000 007F0000 
+	v_mov_b32_e32 v4, s3                                       // 000000001150: 7E080203 
+	s_waitcnt vmcnt(0)                                         // 000000001154: BF8C0F70 
+	v_add_u32_e32 v5, 1, v0                                    // 000000001158: 680A0081 
+	v_add_co_u32_e32 v0, vcc, s2, v2                           // 00000000115C: 32000402 
+	v_addc_co_u32_e32 v1, vcc, v4, v3, vcc                     // 000000001160: 38020704 
+	global_store_byte v[0:1], v5, off                          // 000000001164: DC608000 007F0500 
+; C:\4d33bf14-d510-4ef0-b9b8-a5e43b98584e.txt.cl:5
+; 
+	s_endpgm                                                   // 00000000116C: BF810000 
+
