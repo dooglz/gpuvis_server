@@ -19,10 +19,11 @@ RUN tar --strip-components=1 -C cmake -xz -f cmake*.tar.gz
 EXPOSE 80
 EXPOSE 443
 #RUN cd /src/webserver && npm install
-CMD  git clone https://github.com/dooglz/gpuvis_server.git /src || true && \ 
-     cd /src && git pull && \ 
+CMD  cd /src && git reset origin/master || true && cd / \
+     git clone https://github.com/dooglz/gpuvis_server.git /src || true && \
+     cd /src && git reset --hard origin/master || true && git pull && \
      git clone https://github.com/dooglz/gpuvis.git /web || true && \
      cd /web && git pull && \
-     mkdir -p /build && cd /build && /cmake/bin/cmake /src -DGPUVIS_build_tests=ON && /cmake/bin/cmake --build . --config Release && \
+     mkdir -p /build && cd /build && /cmake/bin/cmake /src -DGPUVIS_build_tests=OFF && /cmake/bin/cmake --build . --config Release && \
      cd /src/webserver && npm install && \
      node /src/webserver/index.js --gpuvis /build/bin/gpuvis_cli --rga /rga/rga --key /ssl/private.key --cert /ssl/soc-web-liv-32_napier_ac_uk.crt --https --webdir /web
